@@ -1,0 +1,30 @@
+<form class="max-w-lg mx-auto bg-white dark:bg-gray-900 rounded-xl shadow p-8 flex flex-col gap-6" (ngSubmit)="onSubmit()" autocomplete="off">
+  <h1 class="text-2xl font-bold mb-2">Schedule New Reading Session</h1>
+  <div class="flex flex-col gap-2">
+    <label for="title" class="font-medium">Title <span class="text-red-500">*</span></label>
+    <input id="title" type="text" required class="p-inputtext p-component rounded px-3 py-2 bg-gray-100 dark:bg-gray-800" [ngModel]="form().title" (ngModelChange)="onTitleChange($event)" name="title" />
+  </div>
+  <div class="flex flex-col gap-2">
+    <label for="description" class="font-medium">Description</label>
+    <textarea id="description" rows="3" class="rounded px-3 py-2 bg-gray-100 dark:bg-gray-800" [ngModel]="form().description" (ngModelChange)="onDescriptionChange($event)" name="description"></textarea>
+  </div>
+  <div class="flex flex-col gap-2">
+    <label for="date" class="font-medium">Date & Time <span class="text-red-500">*</span></label>
+    <p-calendar id="date" [ngModel]="form().date" (ngModelChange)="onDateChange($event)" hourFormat="24" class="w-full"></p-calendar>
+  </div>
+  <div class="flex flex-col gap-2">
+    <label for="partner" class="font-medium">Partner <span class="text-red-500">*</span></label>
+    <input id="partner" type="text" required class="p-inputtext p-component rounded px-3 py-2 bg-gray-100 dark:bg-gray-800" [ngModel]="form().partner" (ngModelChange)="onPartnerChange($event)" name="partner" placeholder="Enter partner name or email" />
+  </div>
+  <div class="flex flex-col gap-2">
+    <label class="font-medium">Text File <span class="text-red-500">*</span></label>
+    <app-file-uploader-ui (fileChange)="onFileChange($event)"></app-file-uploader-ui>
+    @if (!form().file) {
+      <span class="text-xs text-gray-500">Accepted: PDF, ePub, txt</span>
+    }
+    @if (form().file) {
+      <span class="text-xs text-green-600">Selected: {{ form().file?.name }}</span>
+    }
+  </div>
+  <button type="submit" [disabled]="!isValid()" class="bg-primary text-white rounded-md px-6 py-2 font-semibold disabled:opacity-50">Schedule Session</button>
+</form>

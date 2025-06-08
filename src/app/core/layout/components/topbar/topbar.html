@@ -1,0 +1,53 @@
+<div class="flex items-center w-full px-6 h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
+  <!-- Search bar (centered, takes available space) -->
+  <div class="flex items-center flex-1 max-w-xl">
+    <i class="pi pi-search text-gray-400 mr-2"></i>
+    <input
+      type="text"
+      placeholder="Search"
+      class="w-full border-0 outline-none bg-transparent text-gray-700 dark:text-gray-200 placeholder-gray-400"
+    />
+  </div>
+  <!-- Right controls -->
+   <p-menu #menu [model]="items" [popup]="true" class="rounded-2xl shadow-xl border-0 min-w-[220px] bg-white dark:bg-gray-900 overflow-hidden">
+    <ng-template pTemplate="start">
+      <div class="flex items-center gap-3 px-4 py-6 border-b border-gray-200 dark:border-gray-800 bg-gradient-to-b from-blue-50 dark:from-gray-800 to-transparent">
+        <p-avatar image="https://primefaces.org/cdn/primeng/images/demo/avatar/amyelsner.png" shape="circle" class="w-10 h-10" />
+        <div class="flex flex-col">
+          <span class="font-bold text-gray-900 dark:text-gray-100">Amy Elsner</span>
+        </div>
+      </div>
+    </ng-template>
+    <ng-template pTemplate="item" let-item>
+      <a pRipple class="flex items-center px-4 py-3 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-800 transition-colors cursor-pointer">
+        <span [class]="item.icon + ' text-lg text-blue-600 dark:text-blue-400'" ></span>
+        <span class="ml-3 font-medium text-gray-800 dark:text-gray-100">{{ item.label }}</span>
+      </a>
+    </ng-template>
+  </p-menu>
+
+  <div class="flex items-center gap-x-6 ml-auto">
+    <p-button icon="pi pi-microphone" label="New Session" (click)="onStartNewSession()" severity="info"></p-button>
+
+    <p-button [icon]="isDarkMode() ? 'pi pi-sun' : 'pi pi-moon'" [severity]="themeSeverity" [rounded]="true" (onClick)="toggleTheme()" />
+
+    <span (click)="showNotifications($event)" class="relative cursor-pointer">
+      <p-overlaybadge [value]="unreadCount">
+        <i class="pi pi-bell text-gray-500 hover:text-blue-600 transition-colors" style="font-size: 1.5rem"></i>
+      </p-overlaybadge>
+    </span>
+    <p-popover #notificationPopover>
+      <app-notification-list [notifications]="notifications()" />
+    </p-popover>
+    <p-avatar
+      image="https://primefaces.org/cdn/primeng/images/demo/avatar/amyelsner.png"
+      (click)="menu.toggle($event)"
+      class="cursor-pointer w-9 h-9"
+      shape="circle"
+    />
+  </div>
+
+  <p-dialog [visible]="newSessionDialogOpen()" [modal]="true" [closable]="true" (onHide)="closeNewSessionDialog()" [style]="{width: '500px'}" contentStyleClass="!p-6">
+    <app-new-session (submitted)="closeNewSessionDialog()"></app-new-session>
+  </p-dialog>
+</div>
