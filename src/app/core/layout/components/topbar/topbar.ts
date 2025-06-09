@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, signal, inject } from '@angular/core';
+import { Component, OnInit, ViewChild, signal, inject, ChangeDetectorRef } from '@angular/core';
 import { MenuItem } from 'primeng/api';
 import { BadgeModule } from 'primeng/badge';
 import { AvatarModule } from 'primeng/avatar';
@@ -29,6 +29,7 @@ import { NotificationGroup } from '../../../../shared/components/notification-li
 })
 export class Topbar implements OnInit {
   private theme = inject(Theme);
+  private cdr = inject(ChangeDetectorRef);
 
   isDarkMode = this.theme.isDarkMode;
 
@@ -150,6 +151,7 @@ export class Topbar implements OnInit {
 
   closeNewSessionDialog() {
     this.newSessionDialogOpen.set(false);
+    this.cdr.detectChanges();
   }
 
   get searchPlaceholder(): string {

@@ -47,7 +47,7 @@
     />
   </div>
 
-  <p-dialog [visible]="newSessionDialogOpen()" [modal]="true" [closable]="true" (onHide)="closeNewSessionDialog()" [style]="{width: '500px'}" contentStyleClass="!p-6">
+  <p-dialog [visible]="newSessionDialogOpen()" [modal]="true" [closable]="true" (onHide)="closeNewSessionDialog()" >
     <app-new-session (submitted)="closeNewSessionDialog()"></app-new-session>
   </p-dialog>
 </div>

@@ -1,7 +1,7 @@
 @if (isMobile()) {
   <button
     type="button"
-  class="fixed top-4 left-4 z-[60] sm:hidden bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-xl shadow-lg 
+  class="fixed top-4 left-4 z-[60] sm:hidden bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-xl shadow-lg
          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200
          active:scale-95"
     (click)="openMobileSidebar()"
@@ -30,7 +30,7 @@
   @if (isMobile() && isMobileOpen()) {
     <button
       type="button"
-    class="absolute top-4 right-4 z-10 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 
+    class="absolute top-4 right-4 z-10 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700
            text-gray-600 dark:text-gray-300 rounded-full p-2 transition-colors duration-200
            focus:outline-none focus:ring-2 focus:ring-blue-500"
       (click)="closeMobileSidebar()"
@@ -120,7 +120,7 @@
                 </span>
                 @if (nav.badge && nav.badge > 0) {
                   <span
-                class="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold 
+                class="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold
                        bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 rounded-full
                        min-w-[1.25rem] h-5"
                     [attr.aria-label]="nav.badge + ' unread items'"
@@ -133,7 +133,7 @@
 
             @if (nav.badge && nav.badge > 0 && collapsed() && !isMobile()) {
               <span
-              class="absolute -top-1 -right-1 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold 
+              class="absolute -top-1 -right-1 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold
                      bg-red-500 text-white rounded-full min-w-[1.25rem] h-5"
                 [attr.aria-label]="nav.badge + ' unread items'"
                 >
@@ -200,7 +200,7 @@
           <button
             type="button"
             pRipple
-          class="ml-2 p-2 rounded-full text-gray-500 dark:text-gray-400 
+          class="ml-2 p-2 rounded-full text-gray-500 dark:text-gray-400
                  hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300
                  focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
                  transition-colors duration-200"

@@ -1,30 +1,97 @@
-<form class="max-w-lg mx-auto bg-white dark:bg-gray-900 rounded-xl shadow p-8 flex flex-col gap-6" (ngSubmit)="onSubmit()" autocomplete="off">
-  <h1 class="text-2xl font-bold mb-2">Schedule New Reading Session</h1>
-  <div class="flex flex-col gap-2">
-    <label for="title" class="font-medium">Title <span class="text-red-500">*</span></label>
-    <input id="title" type="text" required class="p-inputtext p-component rounded px-3 py-2 bg-gray-100 dark:bg-gray-800" [ngModel]="form().title" (ngModelChange)="onTitleChange($event)" name="title" />
-  </div>
-  <div class="flex flex-col gap-2">
-    <label for="description" class="font-medium">Description</label>
-    <textarea id="description" rows="3" class="rounded px-3 py-2 bg-gray-100 dark:bg-gray-800" [ngModel]="form().description" (ngModelChange)="onDescriptionChange($event)" name="description"></textarea>
-  </div>
-  <div class="flex flex-col gap-2">
-    <label for="date" class="font-medium">Date & Time <span class="text-red-500">*</span></label>
-    <p-calendar id="date" [ngModel]="form().date" (ngModelChange)="onDateChange($event)" hourFormat="24" class="w-full"></p-calendar>
-  </div>
-  <div class="flex flex-col gap-2">
-    <label for="partner" class="font-medium">Partner <span class="text-red-500">*</span></label>
-    <input id="partner" type="text" required class="p-inputtext p-component rounded px-3 py-2 bg-gray-100 dark:bg-gray-800" [ngModel]="form().partner" (ngModelChange)="onPartnerChange($event)" name="partner" placeholder="Enter partner name or email" />
-  </div>
-  <div class="flex flex-col gap-2">
-    <label class="font-medium">Text File <span class="text-red-500">*</span></label>
-    <app-file-uploader-ui (fileChange)="onFileChange($event)"></app-file-uploader-ui>
-    @if (!form().file) {
-      <span class="text-xs text-gray-500">Accepted: PDF, ePub, txt</span>
-    }
-    @if (form().file) {
-      <span class="text-xs text-green-600">Selected: {{ form().file?.name }}</span>
-    }
-  </div>
-  <button type="submit" [disabled]="!isValid()" class="bg-primary text-white rounded-md px-6 py-2 font-semibold disabled:opacity-50">Schedule Session</button>
-</form>
+<div class="bg-gray-50 dark:bg-gray-950 p-4 sm:p-8 rounded-2xl">
+  <form 
+    class="max-w-2xl mx-auto bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 sm:p-8 flex flex-col gap-6" 
+    (ngSubmit)="onSubmit()" 
+    autocomplete="off"
+  >
+    <div class="border-b border-gray-200 dark:border-gray-700 pb-4">
+      <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">Schedule a Reading Session</h1>
+      <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Fill in the details to set up your next practice session.</p>
+    </div>
+
+    <div class="flex flex-col gap-5">
+      <div class="flex flex-col gap-2">
+        <label for="title" class="font-medium text-gray-700 dark:text-gray-300">Title <span class="text-red-500">*</span></label>
+        <input id="title" type="text" required class="p-inputtext p-component w-full rounded-md px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" [ngModel]="form().title" (ngModelChange)="onTitleChange($event)" name="title" />
+        </div>
+      <div class="flex flex-col gap-2">
+        <label for="description" class="font-medium text-gray-700 dark:text-gray-300">Description</label>
+        <textarea id="description" rows="3" class="w-full rounded-md px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" [ngModel]="form().description" (ngModelChange)="onDescriptionChange($event)" name="description"></textarea>
+      </div>
+    </div>
+    
+    <hr class="border-gray-200 dark:border-gray-700" />
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div class="flex flex-col gap-2">
+        <label for="date" class="font-medium text-gray-700 dark:text-gray-300">Date & Time <span class="text-red-500">*</span></label>
+        <p-calendar 
+          id="date" 
+          [ngModel]="form().date" 
+          (ngModelChange)="onDateChange($event)"
+          [showTime]="true" 
+          hourFormat="24"
+          [minDate]="today" 
+          styleClass="w-full"
+          [showIcon]="true" 
+          iconDisplay="input"
+          appendTo="body"
+        ></p-calendar>
+      </div>
+      
+      <div class="flex flex-col gap-2">
+        <label for="partner" class="font-medium text-gray-700 dark:text-gray-300">Partner <span class="text-red-500">*</span></label>
+        <p-autoComplete 
+          id="partner"
+          [ngModel]="form().partner" 
+          (ngModelChange)="onPartnerChange($event)"
+          [suggestions]="filteredPartners()" 
+          (completeMethod)="searchPartners($event)"
+          field="name"
+          placeholder="Search for a partner"
+          styleClass="w-full"
+        >
+          <ng-template pTemplate="item" let-partner>
+            <div class="flex items-center gap-2">
+              <img [src]="partner.avatarUrl" class="w-8 h-8 rounded-full" />
+              <span>{{ partner.name }}</span>
+            </div>
+          </ng-template>
+        </p-autoComplete>
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <label class="font-medium text-gray-700 dark:text-gray-300">Text to Read <span class="text-red-500">*</span></label>
+      @if (!form().file) {
+        <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center cursor-pointer hover:border-blue-500 hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+          <i class="pi pi-upload text-3xl text-gray-400"></i>
+          <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+            <span class="font-semibold text-blue-600 dark:text-blue-400">Click to upload</span> or drag and drop
+          </p>
+          <p class="text-xs text-gray-500 dark:text-gray-500 mt-1">PDF, ePub, TXT (max. 10MB)</p>
+          <app-file-uploader-ui (fileChange)="onFileChange($event)"></app-file-uploader-ui>
+        </div>
+      } @else {
+        <div class="flex items-center justify-between bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 text-green-800 dark:text-green-200 rounded-lg p-3">
+          <div class="flex items-center gap-3">
+            <i class="pi pi-file-check text-xl"></i>
+            <span class="font-medium text-sm">{{ form().file?.name }}</span>
+          </div>
+          <button (click)="removeFile()" type="button" class="text-green-600 dark:text-green-300 hover:text-green-800 dark:hover:text-green-100">
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+      }
+    </div>
+
+    <button type="submit" [disabled]="!isValid() || isLoading()" class="bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-6 py-3 font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2">
+      @if (isLoading()) {
+        <i class="pi pi-spin pi-spinner"></i>
+        <span>Scheduling...</span>
+      } @else {
+        <span>Schedule Session</span>
+      }
+    </button>
+  </form>
+</div>
