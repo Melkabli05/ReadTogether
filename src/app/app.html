@@ -1,1 +1,42 @@
-<app-app-shell></app-app-shell>
+<div class="flex h-screen bg-gray-50 dark:bg-gray-950">
+    <app-sidebar></app-sidebar>
+    <div class="flex-1 flex flex-col">
+      <app-topbar></app-topbar>
+      <main class="flex-1 overflow-y-auto gap-4 p-6">
+        <router-outlet /> 
+        <!-- <app-room-create-page /> -->
+
+        <!-- 
+        <div class="flex flex-col gap-4">
+          <app-button 
+            [size]="'sm'"
+            label="Click Me"
+            severity="primary"
+            gradient="horizontal"
+          />
+
+          <app-button label="Horizontal" gradient="horizontal"/>
+          <app-button label="Vertical" gradient="vertical"/>
+          <app-button label="Diagonal" gradient="diagonal"/>
+          <app-button label="Radial" gradient="radial"/>
+
+          <app-button 
+            label="Success"
+            severity="success"
+            gradient="diagonal"
+            icon="pi-check"
+          />
+
+          <app-button 
+            label="Warning"
+            severity="warning"
+            gradient="radial"
+            icon="pi-exclamation-triangle"
+          />
+        </div>  -->
+      </main>
+    </div>
+  </div>
+
+  <p-toast />
+  

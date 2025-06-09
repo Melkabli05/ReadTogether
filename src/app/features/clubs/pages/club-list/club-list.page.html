@@ -1,0 +1,178 @@
+<div class="min-h-screen">
+  <app-page-header
+    [title]="'Book Clubs'"
+    [subtitle]="'Discover and join reading communities'"
+    [showSearch]="true"
+    [searchPlaceholder]="'Search clubs by name, genre, or description...'"
+    [showSort]="true"
+    [sortOptions]="sortOptions"
+    [sortPlaceholder]="'Sort by'"
+    [selectedSort]="sortBy()"
+    [filterTemplate]="clubFilters"
+    (searchChange)="onSearchChange($event)"
+    [showViewToggle]="false"
+    [actionButtons]="[
+      { label: 'Create Club', icon: 'pi pi-plus', action: 'create', severity: 'white' }
+    ]"
+    (actionClick)="openCreateClubDialog()"
+    [showResultsCounter]="true"
+    [resultsCountLabel]="getTotalResults() + ' clubs found'"
+    [resultsCountUpdatedLabel]="'Updated just now'"
+    [activeFilters]="activeFilters()"
+    (removeFilter)="removeFilterFromState($event)"
+    (clearAllFilters)="clearAllFiltersFromState()"
+  />
+
+  <main class="mx-auto">
+    <app-explore-section
+      [title]="'All Clubs'"
+      [icon]="''"
+      [items]="clubs()"
+      [emptyState]="{
+        icon: 'pi pi-users',
+        title: 'No Clubs Found',
+        message: 'Try adjusting your filters or search terms!'
+      }"
+      [cardTemplate]="clubCardTemplate"
+      [showMoreLabel]=""
+      [colorClass]="''"
+      [sortOptions]="sortOptions"
+      [buttonColorClass]="'bg-blue-100 text-blue-800'"
+      [showSort]="true"
+      (sortChanged)="onSortChange($event)"
+    />
+  </main>
+
+  <p-dialog
+    header="Create a New Club"
+    [(visible)]="createClubDialogOpen"
+    [modal]="true"
+    [style]="{width: '90vw', maxWidth: '600px'}"
+    [breakpoints]="{'960px': '95vw', '640px': '100vw'}"
+    (onHide)="closeCreateClubDialog()"
+    styleClass="rounded-2xl overflow-hidden shadow-2xl"
+  >
+    <div class="p-6">
+      <div class="text-center mb-6">
+        <div class="w-16 h-16 bg-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <i class="pi pi-plus text-white text-2xl"></i>
+        </div>
+        <h2 class="text-2xl font-bold text-slate-900 mb-2">Start Your Reading Journey</h2>
+        <p class="text-slate-600">Create a vibrant community where book lovers can connect, discuss, and grow together.</p>
+      </div>
+
+      <div class="bg-slate-50 rounded-xl p-4 mb-6">
+        <h3 class="font-semibold text-slate-900 mb-2">What you can do:</h3>
+        <ul class="space-y-2 text-sm text-slate-600">
+          <li class="flex items-center gap-2">
+            <i class="pi pi-check text-green-600"></i>
+            Set reading schedules and book selections
+          </li>
+          <li class="flex items-center gap-2">
+            <i class="pi pi-check text-green-600"></i>
+            Host virtual and in-person discussions
+          </li>
+          <li class="flex items-center gap-2">
+            <i class="pi pi-check text-green-600"></i>
+            Customize privacy and membership settings
+          </li>
+          <li class="flex items-center gap-2">
+            <i class="pi pi-check text-green-600"></i>
+            Track reading progress and achievements
+          </li>
+        </ul>
+      </div>
+
+      <div class="flex flex-col sm:flex-row gap-3">
+        <button
+          pButton
+          pRipple
+          type="button"
+          class="flex-1 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl transition-all duration-200"
+          (click)="closeCreateClubDialog()"
+        >
+          Get Started
+        </button>
+        <button
+          pButton
+          pRipple
+          type="button"
+          class="px-6 py-3 border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 font-medium rounded-xl transition-colors duration-200"
+          (click)="closeCreateClubDialog()"
+        >
+          Maybe Later
+        </button>
+      </div>
+    </div>
+  </p-dialog>
+</div>
+
+<ng-template #clubCardTemplate let-club let-i="index">
+  <app-club-card [club]="club" />
+</ng-template>
+
+<ng-template #clubFilters>
+  <div class="flex flex-wrap gap-2 mb-2">
+    <app-popover-multiselect
+      [options]="languageOptions"
+      [selected]="selectedLanguages()"
+      (selectionChange)="onLanguagesChange($event)"
+      [label]="'Language'"
+      [icon]="'pi pi-globe'"
+      [placeholder]="'Choose languages...'"
+      [maxDisplayItems]="3"
+    />
+    <app-popover-multiselect
+      [options]="genreOptions"
+      [selected]="selectedGenres()"
+      (selectionChange)="onGenresChange($event)"
+      [label]="'Genre'"
+      [icon]="'pi pi-book'"
+      [placeholder]="'Choose genres...'"
+      [maxDisplayItems]="3"
+    />
+    <app-popover-multiselect
+      [options]="privacyOptions"
+      [selected]="selectedTypes()"
+      (selectionChange)="onTypesChange($event)"
+      [label]="'Privacy'"
+      [icon]="'pi pi-lock'"
+      [placeholder]="'Choose privacy...'"
+      [maxDisplayItems]="2"
+    />
+    <app-popover-multiselect
+      [options]="activityOptions"
+      [selected]="selectedActivity()"
+      (selectionChange)="onActivityChange($event)"
+      [label]="'Activity'"
+      [icon]="'pi pi-chart-line'"
+      [placeholder]="'Choose activity...'"
+      [maxDisplayItems]="1"
+    />
+    <app-popover-multiselect
+      [options]="membershipOptions"
+      [selected]="selectedMembershipTypes()"
+      (selectionChange)="onMembershipTypeChange($event)"
+      [label]="'Membership'"
+      [icon]="'pi pi-user-plus'"
+      [placeholder]="'Choose membership...'"
+      [maxDisplayItems]="2"
+    />
+    <button
+      pButton
+      class="px-4 py-2 text-sm font-medium border transition-all duration-200"
+      [class.bg-rose-100]="showJoinedOnly()"
+      [class.text-rose-700]="showJoinedOnly()"
+      [class.border-rose-200]="showJoinedOnly()"
+      [class.bg-slate-100]="!showJoinedOnly()"
+      [class.text-slate-700]="!showJoinedOnly()"
+      [class.border-slate-200]="!showJoinedOnly()"
+      [class.hover:bg-rose-50]="!showJoinedOnly()"
+      (click)="toggleMyClubs()"
+      [attr.aria-label]="'Show my clubs only'"
+    >
+      <i class="pi pi-user mr-2 text-xs"></i>
+      My Clubs
+    </button>
+  </div>
+</ng-template>

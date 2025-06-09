@@ -1,0 +1,74 @@
+<div class="min-h-screen">
+  <app-page-header
+    [title]="'Reading Rooms'"
+    [subtitle]="'Join or host live reading sessions'"
+    [showSearch]="true"
+    [searchPlaceholder]="'Search rooms by title, description, or tags...'"
+    [showSort]="true"
+    [backgroundColor]="'bg-gradient-to-r from-blue-600 to-teal-500'"
+    [sortOptions]="languageOptions"
+    [sortOptionsType]="'multi'"
+    [sortMultiLabel]="'Language'"
+    [sortMultiPlaceholder]="'Choose languages...'"
+    (searchChange)="onSearchChange($event)"
+    (sortChange)="onSortLanguageChange($event)"
+    (actionClick)="onHeaderAction($event)"
+    [actionButtons]="[
+      { label: 'Open Room', icon: 'pi pi-microphone', action: 'open', severity: 'white' }
+    ]"
+    [showViewToggle]="false"
+    [showResultsCounter]="true"
+    [resultsCountLabel]="store.rooms().length + ' rooms found'"
+    [resultsCountUpdatedLabel]="'Updated just now'"
+  />
+
+  <main class="mx-auto">
+
+    <!-- tabs list -->
+    <app-tabs-list
+      [tabs]="[
+        { label: 'Live Rooms', value: RoomStatus.Live, activeColor: 'bg-blue-500' },
+        { label: 'Scheduled Rooms', value: RoomStatus.Scheduled, activeColor: 'bg-yellow-500' }
+      ]"
+      [(activeTab)]="activeTab"
+      [tablistLabel]="'Room Tabs'"
+      [navClass]="'max-w-4xl mx-auto mt-4'"
+      (tabChange)="setActiveTab($event)"
+    ></app-tabs-list>
+    
+    <app-explore-section
+      [title]="activeTab() === 'live' ? 'Live Rooms' : 'Scheduled Rooms'"
+      [icon]="''"
+      [items]="store.rooms()"
+      [emptyState]="{
+        icon: 'pi pi-users',
+        title: 'No Rooms',
+        message: 'No rooms match your filters.'
+      }"
+      [cardTemplate]="roomCardTemplate"
+      [sortOptions]="sortOptions"
+      [selectedSort]="store.filters().sortBy"
+      (loadMore)="onLoadMore()"
+      (sortChanged)="onSortChange($event)"
+      [loading]="store.isLoading()"
+    ></app-explore-section>
+  </main>
+
+  <ng-template #roomCardTemplate let-room let-i="index">
+    <app-room-card [room]="room"></app-room-card>
+  </ng-template>
+
+  <p-dialog
+    header="Create a Reading Room"
+    [visible]="openRoomDialogOpen()"
+    (visibleChange)="openRoomDialogOpen.set($event)"
+    [modal]="true"
+    [draggable]="false"
+    [resizable]="false"
+    [style]="{width: '90vw', maxWidth: '800px', height: '90vh', minHeight: '90vh'}"
+    (onHide)="closeOpenRoomDialog()"
+    styleClass="rounded-2xl overflow-hidden shadow-2xl"
+  >
+    <app-room-create-page [showTitle]="false" />
+  </p-dialog>
+</div>

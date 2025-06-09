@@ -1,1 +1,17 @@
-<p>button works!</p>
+<button [ngClass]="buttonClass()" (click)="handleClick()" [disabled]="disabled() || loading()">
+  @if (loading()) {
+    <i class="pi pi-spin pi-spinner button__icon"></i>
+  } @else {
+    <span class="button__content">
+      @if (icon() && iconPos() === 'left') {
+        <i class="pi button__icon" [ngClass]="icon()!"></i>
+      }
+      @if (label()) {
+        <span class="button__label">{{ label() }}</span>
+      }
+      @if (icon() && iconPos() === 'right') {
+        <i class="pi button__icon" [ngClass]="icon()!"></i>
+      }
+    </span>
+  }
+</button>

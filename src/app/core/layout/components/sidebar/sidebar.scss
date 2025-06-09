@@ -1,67 +1,206 @@
-// Custom scrollbar styles (Tailwind classes handle most of this)
-.scrollbar-thin {
-  scrollbar-width: thin;
-
-  &::-webkit-scrollbar {
-    width: 4px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    @apply bg-gray-300 rounded-sm;
-
-    &:hover {
-      @apply bg-gray-400;
+// Enhanced Sidebar Styles with Tailwind CSS
+@layer components {
+  .sidebar {
+    // Custom scrollbar styles
+    &::-webkit-scrollbar {
+      width: 4px;
     }
-  }
 
-  .dark & {
-    scrollbar-color: theme('colors.gray.600') transparent;
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
 
     &::-webkit-scrollbar-thumb {
-      @apply bg-gray-600;
+      @apply bg-gray-300 rounded-sm transition-colors duration-200;
 
       &:hover {
-        @apply bg-gray-500;
+        @apply bg-gray-400;
       }
     }
+
+    .dark & {
+      scrollbar-color: theme('colors.gray.600') transparent;
+
+      &::-webkit-scrollbar-thumb {
+        @apply bg-gray-600;
+
+        &:hover {
+          @apply bg-gray-500;
+        }
+      }
+    }
+  }
+
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-gutter: stable;
+  }
+
+  // Sidebar backdrop animation
+  .sidebar-backdrop {
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+
+  // Navigation item enhancements
+  .sidebar-nav-item {
+    &--active {
+      box-shadow: inset 3px 0 0 theme('colors.indigo.500');
+      
+      .sidebar-nav-icon i {
+        @apply text-indigo-600 dark:text-indigo-400;
+      }
+    }
+
+    &:hover:not(&--active) {
+      .sidebar-nav-icon i {
+        @apply text-gray-900 dark:text-gray-100;
+      }
+    }
+
+    // Focus styles
+    &:focus-visible {
+      @apply ring-2 ring-indigo-500 ring-offset-2 ring-offset-white dark:ring-offset-gray-900;
+    }
+  }
+
+  // Badge animations
+  .sidebar-nav-badge,
+  .sidebar-nav-badge--collapsed {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  // User profile enhancements
+  .sidebar-user-settings {
+    &:hover i {
+      transform: rotate(45deg);
+    }
+  }
+
+  // Logo hover effect
+  .sidebar-logo:hover {
+    .flex-shrink-0 {
+      transform: scale(1.05);
+    }
+  }
+
+  // Mobile header
+  .sidebar-mobile-header {
+    min-height: 64px;
+  }
+}
+
+// Global styles for sidebar host
+:host {
+  .sidebar-host {
+    // Ensure proper stacking context
+    isolation: isolate;
+  }
+
+  // When mobile sidebar is open, prevent body scroll
+  body.sidebar-mobile-open {
+      overflow: hidden;
+      touch-action: none;
   }
 }
 
 // Enhanced focus styles for accessibility
-:host ::ng-deep {
-  // Ripple effect customization
-  .p-ripple {
-    overflow: hidden;
-    position: relative;
-  }
-
-  .p-ink {
-    background: rgba(37, 99, 235, 0.2);
-    border-radius: 50%;
-    transform: scale(0);
-
-    &.p-ink-active {
-      animation: ripple 0.6s linear;
-    }
-  }
-
+:host {
+  // PrimeNG Avatar customization
   .p-avatar {
     transition: all 0.2s ease-in-out;
 
     &:hover {
       transform: scale(1.05);
     }
+
+    img {
+      transition: all 0.2s ease-in-out;
+    }
+  }
+
+  // PrimeNG Tooltip customization
+  .p-tooltip {
+    .p-tooltip-text {
+      @apply bg-gray-900 text-white text-sm px-2 py-1 rounded shadow-lg;
+      font-size: 0.875rem;
+      line-height: 1.25rem;
+    }
+
+    .p-tooltip-arrow {
+      @apply border-gray-900;
+    }
+
+    .dark & {
+      .p-tooltip-text {
+        @apply bg-gray-100 text-gray-900;
+      }
+
+      .p-tooltip-arrow {
+        @apply border-gray-100;
+      }
+    }
+  }
+
+  // Button ripple effect
+  .p-ripple {
+    overflow: hidden;
+    position: relative;
+  }
+
+  .p-ink {
+    background: rgba(79, 70, 229, 0.2); // indigo-600
+    border-radius: 50%;
+    transform: scale(0);
+    transition: transform 0.6s, opacity 0.6s;
+
+    &.p-ink-active {
+      animation: ripple 0.6s linear;
+    }
   }
 }
 
+// Animations
 @keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
   100% {
-    opacity: 0;
     transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}
+
+// High contrast mode support
+@media (prefers-contrast: high) {
+  .sidebar {
+    @apply border-2 border-gray-900 dark:border-gray-100;
+  }
+
+  .sidebar-nav-item {
+    @apply border border-transparent;
+
+    &--active {
+      @apply border-indigo-600 bg-indigo-100 dark:bg-indigo-900;
+    }
+
+    &:hover:not(&--active) {
+      @apply border-gray-400 dark:border-gray-600;
+    }
   }
 }
 
@@ -71,5 +210,45 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .sidebar-backdrop {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+// Print styles
+@media print {
+  .sidebar {
+    display: none;
+  }
+}
+
+// Container queries for responsive design (if supported)
+@container (max-width: 64rem) {
+  .sidebar {
+    width: 100%;
+    max-width: 85vw;
+  }
+}
+
+// Dark mode specific enhancements
+@media (prefers-color-scheme: dark) {
+  .sidebar {
+    color-scheme: dark;
+  }
+}
+
+// Touch device optimizations
+@media (hover: none) and (pointer: coarse) {
+  .sidebar-nav-item {
+    min-height: 48px; // Larger touch targets
+  }
+
+  .sidebar-user-settings {
+    min-width: 48px;
+    min-height: 48px;
   }
 }

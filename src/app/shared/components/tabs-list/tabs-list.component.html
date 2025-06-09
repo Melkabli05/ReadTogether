@@ -1,0 +1,40 @@
+<nav
+  class="flex rounded-xl w-full p-1 gap-2 border border-gray-200 shadow-md bg-gray-50 {{ navClass() }}"
+  role="tablist"
+  [attr.aria-label]="tablistLabel()"
+>
+  @for (tab of tabs(); let i = $index; track tab.value) {
+    <button
+      type="button"
+      class="flex-1 py-2 cursor-pointer text-center rounded-lg transition font-medium text-gray-700 focus:outline-none {{ tabClass() }} {{ isActive(tab) ? tab.activeColor : '' }}"
+      [ngClass]="{
+        'hover:bg-gray-200': !isActive(tab) || !tab.activeColor,
+        'bg-white text-gray-900 shadow font-semibold border-gray-300': isActive(tab) && !tab.activeColor,
+        'shadow font-semibold border-gray-300 text-white': isActive(tab) && tab.activeColor,
+        'opacity-60 cursor-not-allowed': tab.disabled
+      }"
+      
+      [attr.aria-selected]="isActive(tab)"
+      [attr.tabindex]="isActive(tab) ? 0 : -1"
+      [attr.aria-disabled]="tab.disabled"
+      [disabled]="tab.disabled"
+      (click)="onTabClick(tab, i)"
+      (keydown)="onKeydown($event, i)"
+      [attr.id]="'tab-' + tab.value"
+      [attr.aria-controls]="'tabpanel-' + tab.value"
+      [class.focus-visible]="isFocused(i)"
+    >
+      <div class="flex items-center justify-center">
+        <span class="flex items-center">
+          @if (tab.icon) {
+            <i [class]="tab.icon + ' mr-2 text-base align-middle'"></i>
+          }
+          {{ tab.label }}
+        </span>
+        @if (tab.tooltip) {
+            <i class="pi pi-info-circle ml-8 text-base align-middle" pTooltip="{{tab.tooltip}}" tooltipPosition="top" placeholder="Top"></i>
+          }
+      </div>
+    </button>
+  }
+</nav> 

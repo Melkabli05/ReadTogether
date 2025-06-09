@@ -14,18 +14,16 @@ import { OverlayPanelModule } from 'primeng/overlaypanel';
 import { OverlayBadgeModule } from 'primeng/overlaybadge';
 import { NotificationList } from '../../../../shared/components/notification-list/notification-list';
 import { PopoverModule } from 'primeng/popover';
-import { ButtonModule, ButtonSeverity } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
-import { NewSession } from '../../../../modules/reading-session/components/new-session/new-session';
 import { Theme } from '../../../services/theme';
 import { NotificationGroup } from '../../../../shared/components/notification-list/notification-list.model';
+import { Button, ButtonSeverity } from "../../../../shared/components/button/button";
 
 @Component({
   selector: 'app-topbar',
   templateUrl: './topbar.html',
   styleUrl: './topbar.scss',
-  standalone: true,
-  imports: [MenubarModule, BadgeModule, AvatarModule, InputTextModule, RippleModule, AutoCompleteModule, DropdownModule, FormsModule, MenuModule, OverlayPanelModule, OverlayBadgeModule, NotificationList, PopoverModule, ButtonModule, DialogModule, NewSession]
+  imports: [MenubarModule, BadgeModule, AvatarModule, InputTextModule, RippleModule, AutoCompleteModule, DropdownModule, FormsModule, MenuModule, OverlayPanelModule, OverlayBadgeModule, NotificationList, PopoverModule, DialogModule, Button]
 })
 export class Topbar implements OnInit {
   private theme = inject(Theme);

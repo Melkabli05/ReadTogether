@@ -1,0 +1,1296 @@
+---
+globs: *.java
+alwaysApply: false
+---
+
+# Java 24 & Spring Boot 3.4+ Development Guidelines
+You are an expert in Java programming, Spring Boot, Spring Framework, Maven, JUnit, and related Java technologies. These guidelines provide a comprehensive set of best practices for developing modern, robust, and scalable applications using Java 24 and Spring Boot 3.4+.
+
+1. Core Development Philosophy
+Latest Features: Always use the latest Java features (21-24) when they provide cleaner, more readable, or more performant code.
+
+Immutability: Prefer immutability over mutability – use records, sealed classes, and immutable collections.
+
+Functional Programming: Embrace functional programming patterns with streams, optionals, and method references.
+
+Self-Documenting Code: Write self-documenting code with descriptive names and minimal comments.
+
+Readability First: Optimize for readability first, performance second, unless performance is critically required.
+
+Modern Idioms: Use modern Java idioms and avoid legacy patterns from older Java versions.
+
+2. Code Style and Structure
+Clean Code: Write clean, efficient, and well-documented Java code with accurate Spring Boot examples.
+
+Spring Boot Conventions: Use Spring Boot best practices and conventions throughout your code.
+
+RESTful API Design: Implement RESTful API design patterns when creating web services.
+
+Descriptive Naming: Use descriptive method and variable names following camelCase convention.
+
+Application Structure: Structure Spring Boot applications with clear separation: controllers, services, repositories, models, configurations.
+
+Layered Architecture: Follow a layered architecture with clear separation of concerns.
+
+Domain-Driven Design (DDD): Implement DDD principles for complex business logic.
+
+Package Organization: Use package-by-layer or package-by-feature organization based on application complexity.
+
+3. Naming Conventions
+Class Names: Use PascalCase for class names (e.g., UserController, OrderService).
+
+Method & Variable Names: Use camelCase for method and variable names (e.g., findUserById, isOrderValid).
+
+Constants: Use ALL_CAPS for constants (e.g., MAX_RETRY_ATTEMPTS, DEFAULT_PAGE_SIZE).
+
+Package Names: Use descriptive package names following reverse domain notation (e.g., com.example.myapp.users).
+
+REST Endpoints: Use meaningful names for REST endpoints (/api/v1/users/{id}/orders not /api/v1/u/{id}/o).
+
+Method Names: Use verb-noun combinations for method names (calculateTotalAmount, validateUserCredentials).
+
+Collection Endpoints: Use plural nouns for collection endpoints (/users, /orders).
+
+Configuration Properties: Use kebab-case for configuration property names in YAML files.
+
+4. Java 21-24 Features and Usage
+4.1. Java 21 (LTS) - Mandatory Features
+Record Patterns (JEP 440): ALWAYS use for data extraction.
+
+// Record Patterns (JEP 440) - ALWAYS use for data extraction
+public sealed interface Result<T> permits Success, Failure {
+    record Success<T>(T value) implements Result<T> {}
+    record Failure<T>(Exception error) implements Result<T> {}
+}
+
+public String handleResult(Result<String> result) {
+    return switch (result) {
+        case Success<String>(var value) -> STR."Success: \{value}";
+        case Failure<String>(var error) -> STR."Error: \{error.getMessage()}";
+    };
+}
+
+
+Pattern Matching for switch (JEP 441): ALWAYS use over if-else chains.
+
+// Pattern Matching for switch (JEP 441) - ALWAYS use over if-else chains
+public double calculateArea(Shape shape) {
+    return switch (shape) {
+        case Circle(var radius) -> Math.PI * radius * radius;
+        case Rectangle(var width, var height) -> width * height;
+        case Triangle(var base, var height) -> 0.5 * base * height;
+    };
+}
+
+
+String Templates (Preview): USE for complex string formatting.
+
+// String Templates (Preview) - USE for complex string formatting
+String name = "John";
+int age = 30;
+String message = STR."Hello, \{name}! You are \{age} years old.";
+
+// Multi-line String Templates
+String customerInfo = STR."""
+    Customer: \{customer.name()}
+    Email: \{customer.email()}
+    Orders: \{customer.orders().size()}
+    Total: $\{customer.getTotalSpent()}
+    """;
+
+
+Sequenced Collections (JEP 431): ALWAYS use for ordered operations.
+
+// Sequenced Collections (JEP 431) - ALWAYS use for ordered operations
+List<String> names = List.of("Alice", "Bob", "Charlie");
+String firstName = names.getFirst();  // NOT names.get(0)
+String lastName = names.getLast();    // NOT names.get(names.size() - 1)
+
+
+Virtual Threads (JEP 444): MANDATORY for I/O operations and high-concurrency applications.
+
+// Virtual Threads in Spring Boot
+@Service
+public class AsyncService {
+
+    @Async("virtualThreadExecutor")
+    public CompletableFuture<String> processAsync(String data) {
+        // Long-running operation
+        return CompletableFuture.completedFuture(processData(data));
+    }
+}
+
+@Configuration
+public class VirtualThreadConfig {
+
+    @Bean("virtualThreadExecutor")
+    public Executor virtualThreadExecutor() {
+        return Executors.newVirtualThreadPerTaskExecutor();
+    }
+}
+
+// Structured Concurrency (JEP 453) - Use for better async programming
+public class UserProfileService {
+
+    public UserProfile getUserProfile(Long userId) {
+        try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
+            var userTask = scope.fork(() -> userService.findById(userId));
+            var ordersTask = scope.fork(() -> orderService.findByUserId(userId));
+            var preferencesTask = scope.fork(() -> preferencesService.findByUserId(userId));
+
+            scope.join();
+            scope.throwIfFailed();
+
+            return new UserProfile(
+                userTask.resultNow(),
+                ordersTask.resultNow(),
+                preferencesTask.resultNow()
+            );
+        } catch (InterruptedException | ExecutionException e) {
+            throw new ServiceException("Failed to load user profile", e);
+        }
+    }
+}
+
+
+4.2. Java 22 - Required Features
+Unnamed Variables and Patterns (JEP 456): ALWAYS use for unused variables.
+
+// Unnamed Variables and Patterns (JEP 456) - ALWAYS use for unused variables
+public void processOrders(List<Order> orders) {
+    for (Order _ : orders) {  // Use _ for unused loop variable
+        // Process order without needing the variable
+    }
+}
+
+
+Stream.gather() (JEP 461): USE for complex stream operations.
+
+// Stream.gather() (JEP 461) - USE for complex stream operations
+List<String> result = Stream.of("a", "bb", "ccc", "dddd")
+    .gather(Gatherer.fold(
+        () -> new StringBuilder(),
+        (sb, str) -> sb.append(str).append("-")
+    ))
+    .map(StringBuilder::toString)
+    .toList();
+
+
+Foreign Function & Memory API (JEP 454): USE for native library integration when needed.
+
+// Foreign Function & Memory API (JEP 454) - USE for native integration
+import java.lang.foreign.*;
+import java.lang.invoke.MethodHandle;
+import static java.lang.foreign.ValueLayout.ADDRESS;
+import static java.lang.foreign.ValueLayout.JAVA_LONG;
+
+public class NativeLibraryIntegration {
+
+    private static final MethodHandle strlen = Linker.nativeLinker()
+        .downcallHandle(
+            FunctionDescriptor.of(JAVA_LONG, ADDRESS),
+            Linker.Option.firstVariadicArg(0)
+        );
+
+    public long getStringLength(String str) {
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment cString = arena.allocateFrom(str);
+            return (long) strlen.invoke(cString);
+        } catch (Throwable t) {
+            throw new RuntimeException(t);
+        }
+    }
+}
+
+
+4.3. Java 23 - Preferred Features
+Enhanced Pattern Matching: USE for complex data structures.
+
+// Enhanced Pattern Matching - USE for complex data structures
+public sealed interface Expression permits Literal, Addition, Multiplication {
+    record Literal(int value) implements Expression {}
+    record Addition(Expression left, Expression right) implements Expression {}
+    record Multiplication(Expression left, Expression right) implements Expression {}
+}
+
+public int evaluate(Expression expr) {
+    return switch (expr) {
+        case Literal(var value) -> value;
+        case Addition(var left, var right) -> evaluate(left) + evaluate(right);
+        case Multiplication(var left, var right) -> evaluate(left) * evaluate(right);
+    };
+}
+
+
+Stream Gatherers: USE for custom intermediate operations.
+
+// Stream Gatherers - USE for custom stream operations
+import java.util.ArrayDeque;
+import java.util.List;
+import java.util.stream.Gatherer;
+import java.util.stream.Stream;
+
+public class CustomGatherers {
+    public static <T> Gatherer<T, ?, List<T>> takeLast(int n) {
+        return Gatherer.of(
+            () -> new ArrayDeque<T>(n),
+            (state, element, downstream) -> {
+                if (state.size() == n) {
+                    state.removeFirst();
+                }
+                state.addLast(element);
+                return true;
+            },
+            (state, downstream) -> {
+                state.forEach(downstream::push);
+                return true;
+            }
+        );
+    }
+}
+
+
+4.4. Java 24 - Cutting-Edge Features
+Advanced String Templates: USE for complex formatting.
+
+// Advanced String Templates - USE for complex formatting
+import static java.util.stream.Collectors.*;
+import java.util.List;
+import java.util.Map;
+
+public record Sale(String customer, double amount) {}
+
+public String generateReport(List<Sale> sales) {
+    return STR."""
+        Sales Report
+        ============
+        Total Sales: \{sales.size()}
+        Revenue: $\{sales.stream().mapToDouble(Sale::amount).sum()}
+        Top Customer: \{sales.stream()
+            .collect(groupingBy(Sale::customer, summingDouble(Sale::amount)))
+            .entrySet().stream()
+            .max(Map.Entry.comparingByValue())
+            .map(Map.Entry::getKey)
+            .orElse("N/A")}
+        """;
+}
+
+
+Scoped Values: USE instead of ThreadLocal in virtual thread environments.
+
+// Scoped Values - USE instead of ThreadLocal in virtual thread environments
+import java.util.Optional;
+import java.util.concurrent.ScopedValue;
+import java.util.function.Supplier;
+
+public record User(Long id, String name) {}
+
+@Service
+public class SecurityContextService {
+    private static final ScopedValue<User> CURRENT_USER = ScopedValue.newInstance();
+
+    public <T> T executeWithUser(User user, Supplier<T> operation) {
+        return ScopedValue.callWhere(CURRENT_USER, user, operation);
+    }
+
+    public Optional<User> getCurrentUser() {
+        return Optional.ofNullable(CURRENT_USER.orElse(null));
+    }
+}
+
+
+Vector API: Utilize vector operations for performance-critical computations.
+
+Class-File API: Use for bytecode manipulation and analysis.
+
+5. Spring Boot 3.4+ Specifics
+Starters: Use Spring Boot 3.4+ starters for quick project setup and dependency management.
+
+Annotations: Implement proper use of annotations (@SpringBootApplication, @RestController, @Service, @Component).
+
+Auto-Configuration: Utilize Spring Boot's enhanced auto-configuration features effectively.
+
+Exception Handling: Implement proper exception handling using @ControllerAdvice and @ExceptionHandler.
+
+Native Compilation: Use Spring Boot 3.x native compilation support with GraalVM when applicable.
+
+Observability: Leverage Spring Boot's improved observability features with Micrometer.
+
+Problem Details (RFC 7807): Use Spring Boot 3.x problem details support for better error responses.
+
+Container Image Building: Implement Spring Boot's enhanced container image building with buildpacks.
+
+Graceful Shutdown: Use Spring Boot's improved graceful shutdown capabilities.
+
+Configuration Binding: Leverage Spring Boot's enhanced configuration binding with nested properties.
+
+6. Spring Boot 3.4+ Advanced Features
+Spring Authorization Server: Use for OAuth2 authorization server implementation.
+
+Spring Cloud Gateway: Implement API gateway patterns with reactive programming.
+
+Spring Data REST: Auto-generate REST APIs from repositories.
+
+Spring WebFlux: Use reactive programming for non-blocking applications.
+
+Spring Native: Compile to native executables with GraalVM.
+
+Spring Modulith: Structure monolithic applications with a modular architecture.
+
+Spring Cloud Function: Implement serverless functions with Spring.
+
+Spring Cloud Stream: Build event-driven microservices.
+
+Spring Security 6.x: Implement modern authentication and authorization.
+
+Spring GraphQL: Build GraphQL APIs with Spring Boot.
+
+7. Configuration and Properties
+YAML Preference: Use application.yml over application.properties for better readability.
+
+Environment-Specific Configs: Implement environment-specific configurations using Spring Profiles.
+
+Type-Safe Configuration: Use @ConfigurationProperties with records for type-safe configuration.
+
+@ConfigurationProperties(prefix = "app.security")
+@Validated
+public record SecurityProperties(
+    @NotBlank String jwtSecret,
+    @NotNull @DurationMin(minutes = 5) Duration jwtExpiration,
+    @NotEmpty List<@Pattern(regexp = "^https?://.*") String> allowedOrigins,
+    @Valid RateLimitConfig rateLimit
+) {
+    public record RateLimitConfig(
+        @Min(1) int requestsPerMinute,
+        @NotNull Duration windowSize
+    ) {}
+}
+
+
+Configuration Processor: Leverage Spring Boot's configuration processor for metadata generation.
+
+Immutable Config Classes: Use @ConstructorBinding with records for immutable configuration classes.
+
+Configuration Validation: Implement configuration validation with Bean Validation.
+
+Encrypted Properties: Use encrypted properties for sensitive data.
+
+Organization: Organize configuration files by environment and feature.
+
+7.1. Advanced Configuration Properties Example
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.*;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.bind.DefaultValue;
+import org.springframework.validation.annotation.Validated;
+import java.time.Duration;
+import java.util.List;
+
+@ConfigurationProperties(prefix = "app")
+@Validated
+public record ApplicationProperties(
+    @Valid Security security,
+    @Valid Database database,
+    @Valid Cache cache,
+    @Valid Monitoring monitoring
+) {
+    public record Security(
+        @NotBlank String jwtSecret,
+        @NotNull @DurationMin(minutes = 5) Duration jwtExpiration,
+        @NotEmpty List<@Pattern(regexp = "^https?://.*") String> allowedOrigins,
+        @Valid RateLimiting rateLimiting
+    ) {
+        public record RateLimiting(
+            @Min(1) int requestsPerMinute,
+            @NotNull Duration windowSize,
+            @DefaultValue("false") boolean enableDistributedLimiting
+        ) {}
+    }
+
+    public record Database(
+        @Min(1) int poolSize,
+        @NotNull Duration connectionTimeout,
+        @NotNull Duration idleTimeout,
+        @DefaultValue("false") boolean enableQueryLogging
+    ) {}
+
+    public record Cache(
+        @NotNull Duration defaultTtl,
+        @Min(1) int maxSize,
+        @NotBlank String redisUrl,
+        @DefaultValue("false") boolean enableDistributedCache
+    ) {}
+
+    public record Monitoring(
+        @DefaultValue("true") boolean enableMetrics,
+        @DefaultValue("true") boolean enableTracing,
+        @NotNull Duration exportInterval,
+        @NotEmpty List<String> metricTags
+    ) {}
+}
+
+
+7.2. Virtual Thread Configuration
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+
+@Configuration
+@EnableAsync
+@EnableScheduling
+public class AsyncConfiguration {
+
+    @Bean("virtualThreadExecutor")
+    @Primary
+    public Executor virtualThreadExecutor() {
+        return Executors.newVirtualThreadPerTaskExecutor();
+    }
+
+    @Bean("boundedVirtualThreadExecutor")
+    public Executor boundedVirtualThreadExecutor() {
+        return Executors.newThreadPerTaskExecutor(
+            Thread.ofVirtual()
+                .name("bounded-virtual-", 0)
+                .factory()
+        );
+    }
+
+    @Bean
+    public TaskScheduler taskScheduler() {
+        var scheduler = new ThreadPoolTaskScheduler();
+        scheduler.setPoolSize(Runtime.getRuntime().availableProcessors());
+        scheduler.setThreadNamePrefix("scheduler-");
+        scheduler.setWaitForTasksToCompleteOnShutdown(true);
+        scheduler.setAwaitTerminationSeconds(30);
+        return scheduler;
+    }
+}
+
+
+Add spring.threads.virtual.enabled=true to your application.properties or application.yml to enable virtual threads for Spring Boot's default task execution.
+
+8. Dependency Injection and IoC
+Constructor Injection: Always use constructor injection over field injection for better testability.
+
+Lombok: Use @RequiredArgsConstructor from Lombok for cleaner constructor injection.
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+@Service
+@RequiredArgsConstructor
+public class UserService {
+    private final UserRepository userRepository;
+    private final NotificationService notificationService;
+    private final SecurityProperties securityProperties;
+
+    // Methods here
+}
+
+
+IoC Container: Leverage Spring's IoC container for managing bean lifecycles.
+
+Lazy Annotation: Use @Lazy annotation judiciously to avoid circular dependencies.
+
+Custom Bean Scopes: Implement custom bean scopes when needed (@Scope).
+
+Disambiguation: Use @Primary and @Qualifier for disambiguation when multiple beans exist.
+
+Factory Beans: Implement factory beans for complex object creation.
+
+Feature Toggles: Use @ConditionalOnProperty for feature toggles.
+
+9. Data Access and ORM
+Spring Data JPA 3.x: Use Spring Data JPA 3.x for database operations.
+
+Entity Relationships: Implement proper entity relationships and cascading.
+
+Database Migrations: Use database migrations with Flyway or Liquibase.
+
+Custom Repositories: Implement custom repository methods when needed.
+
+Query by Example: Use Spring Data's query by example for dynamic queries.
+
+Auditing: Implement proper auditing with @CreatedDate, @LastModifiedDate.
+
+Projections: Use projections for read-only operations.
+
+Soft Deletes: Implement soft deletes for important entities.
+
+Transactions: Use database transactions properly with @Transactional.
+
+Exception Handling: Implement proper exception handling for data access operations.
+
+Batch Operations: Use batch operations for bulk data processing.
+
+Connection Pooling: Implement proper database connection pooling configuration.
+
+10. RESTful API Design and Validation
+Springdoc OpenAPI 3: Use Springdoc OpenAPI 3 for API documentation.
+
+Bean Validation: Implement comprehensive Bean Validation using Jakarta Validation API.
+
+Custom Validators: Use custom validators for business logic validation.
+
+Error Responses: Implement proper error responses with problem details (RFC 7807).
+
+API Versioning: Version your APIs properly (e.g., /api/v1/users).
+
+OpenAPI Annotations: Use OpenAPI annotations for better documentation.
+
+Examples: Implement request/response examples in API documentation.
+
+Content Negotiation: Use content negotiation for different response formats.
+
+HTTP Caching: Implement proper HTTP caching headers.
+
+ETags: Use ETags for optimistic concurrency control.
+
+10.1. API Documentation and Validation Example
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/v1/users")
+@Validated
+@Tag(name = "User Management", description = "Operations for managing users")
+public class UserController {
+
+    @PostMapping
+    @Operation(summary = "Create a new user", description = "Creates a new user with the provided information")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "User created successfully"),
+        @ApiResponse(responseCode = "400", description = "Invalid input data"),
+        @ApiResponse(responseCode = "409", description = "User already exists")
+    })
+    public ResponseEntity<UserDto> createUser(@Valid @RequestBody CreateUserRequest request) {
+        // Implementation
+        return ResponseEntity.status(HttpStatus.CREATED).body(new UserDto(request.name(), request.email()));
+    }
+}
+
+public record CreateUserRequest(
+    @NotBlank @Size(min = 2, max = 50)
+    @Schema(description = "User's full name", example = "John Doe")
+    String name,
+
+    @Email
+    @Schema(description = "User's email address", example = "john.doe@example.com")
+    String email,
+
+    @Pattern(regexp = "^\\+?[1-9]\\d{1,14}$")
+    @Schema(description = "User's phone number", example = "+1234567890")
+    String phoneNumber
+) {}
+
+public record UserDto(String name, String email) {}
+
+
+11. Security Best Practices
+Spring Security 6.x: Implement Spring Security 6.x for authentication and authorization.
+
+Password Encoding: Use proper password encoding (BCrypt, Argon2, SCrypt).
+
+CORS Configuration: Implement CORS configuration when necessary.
+
+Method-Level Security: Use Spring Security's method-level security (@PreAuthorize, @PostAuthorize).
+
+Session Management: Implement proper session management (preferably stateless for REST APIs).
+
+CSRF Protection: Use Spring Security's CSRF protection (if stateful sessions are used).
+
+Rate Limiting: Implement rate limiting to prevent abuse.
+
+HTTPS Everywhere: Use HTTPS everywhere in production.
+
+Input Validation: Implement proper input validation and sanitization.
+
+Security Headers: Use security headers (HSTS, CSP, X-Frame-Options).
+
+Audit Logging: Implement audit logging for security events.
+
+OAuth2/OpenID Connect: Use OAuth2/OpenID Connect for modern authentication flows.
+
+11.1. Spring Security Configuration Example
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.SecurityFilterChain;
+import static org.springframework.security.config.Customizer.withDefaults;
+
+@Configuration
+@EnableWebSecurity
+@EnableMethodSecurity
+public class SecurityConfig {
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        return http
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/api/public/**").permitAll()
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .anyRequest().authenticated()
+            )
+            .oauth2ResourceServer(oauth2 -> oauth2.jwt(withDefaults()))
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+            .headers(headers -> headers.frameOptions().deny()) // Prevent clickjacking
+            .csrf(csrf -> csrf.disable()) // Disable CSRF for stateless APIs
+            .build();
+    }
+}
+
+
+12. Testing with JUnit 5 and Spring Boot Test
+Comprehensive Tests: Write comprehensive unit tests using JUnit 5 and Spring Boot Test.
+
+Integration Tests: Use @SpringBootTest for integration tests.
+
+Repository Tests: Use @DataJpaTest for repository layer tests.
+
+Controller Tests: Use @WebMvcTest for controller tests with MockMvc.
+
+JSON Tests: Use @JsonTest for JSON serialization tests.
+
+Test Slices: Implement test slices for focused testing.
+
+Testcontainers: Use Testcontainers for integration tests with real databases.
+
+Test-Specific Beans: Use @TestConfiguration for test-specific beans.
+
+Parameterized Tests: Implement parameterized tests with @ParameterizedTest.
+
+Mocking: Use @MockBean and @SpyBean for mocking in Spring context.
+
+Custom Test Slices: Implement custom test slices for specific testing scenarios.
+
+12.1. Testing Example
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+
+@SpringBootTest
+@Testcontainers
+class UserServiceIntegrationTest {
+
+    @Container
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15")
+            .withDatabaseName("testdb")
+            .withUsername("test")
+            .withPassword("test");
+
+    @Test
+    void shouldCreateUser() {
+        // Test implementation
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", " ", "invalid-email"})
+    void shouldRejectInvalidEmails(String email) {
+        // Test implementation
+    }
+}
+
+
+13. Performance and Scalability
+Caching: Implement caching strategies using Spring Cache abstraction with Redis or Caffeine.
+
+Async Processing: Use async processing with @Async and virtual threads for non-blocking operations.
+
+Database Optimization: Implement proper database indexing and query optimization.
+
+Metrics: Use Spring Boot's built-in metrics with Micrometer.
+
+Connection Pooling: Leverage connection pooling (HikariCP is default).
+
+Pagination: Implement proper pagination using Spring Data's Pageable.
+
+Read Replicas: Use database read replicas for read-heavy operations.
+
+Response Compression: Implement response compression for API endpoints.
+
+CDN: Use CDN for static content delivery.
+
+JVM Tuning: Implement proper JVM tuning for production environments.
+
+Profiling Tools: Use profiling tools (JProfiler, YourKit) for performance analysis.
+
+14. Logging and Monitoring
+SLF4J & Logback: Use SLF4J with Logback for logging.
+
+Log Levels: Implement proper log levels (ERROR, WARN, INFO, DEBUG, TRACE).
+
+Actuator: Use Spring Boot Actuator for application monitoring and metrics.
+
+Structured Logging: Implement structured logging with JSON format for production.
+
+Correlation IDs: Use correlation IDs for distributed tracing.
+
+Observability Tools: Integrate with observability tools (Prometheus, Grafana, Jaeger).
+
+Centralized Logging: Implement centralized logging with ELK Stack or similar.
+
+Distributed Tracing: Use distributed tracing with Zipkin or Jaeger.
+
+APM: Implement application performance monitoring (APM).
+
+Log Aggregation: Use log aggregation for microservices environments.
+
+Alerting: Implement proper alerting based on metrics and logs.
+
+15. Build and Deployment
+Maven 3.9+: Use Maven 3.9+ for dependency management and build processes.
+
+Profiles: Implement proper profiles for different environments (dev, test, prod).
+
+Docker: Use Docker and Docker Compose for containerization.
+
+Multi-stage Builds: Implement multi-stage Docker builds for smaller images.
+
+Layered JARs: Use Spring Boot's layered JARs for better Docker layer caching.
+
+Health Checks: Implement proper health checks and readiness probes.
+
+Kubernetes: Use Kubernetes for container orchestration.
+
+CI/CD Pipelines: Implement CI/CD pipelines with proper testing stages.
+
+Infrastructure as Code: Use infrastructure as code (Terraform, AWS CDK).
+
+Secrets Management: Implement proper secrets management.
+
+Zero-Downtime Deployments: Use blue-green or canary deployments for zero-downtime updates.
+
+16. Advanced Patterns and Practices
+Event-Driven Architecture: Implement with Spring Cloud Stream or Spring Events.
+
+CQRS Pattern: Separate read and write models when appropriate.
+
+Saga Pattern: Implement distributed transactions with Spring State Machine.
+
+API Gateway Pattern: Use Spring Cloud Gateway for routing and filtering.
+
+Reactive Programming: Use Spring WebFlux for high-concurrency applications.
+
+Circuit Breaker Pattern: Use Resilience4j for fault tolerance.
+
+Bulkhead Pattern: Isolate resources for different operations.
+
+Retry Pattern: Implement exponential backoff for transient failures.
+
+Cache-Aside Pattern: Implement proper caching strategies.
+
+Outbox Pattern: Ensure eventual consistency in distributed systems.
+
+17. Microservices Architecture and Best Practices
+Developing microservices requires specific considerations beyond monolithic applications.
+
+17.1. Key Microservice Patterns
+Service Discovery:
+
+Client-Side Discovery: Use Spring Cloud Netflix Eureka or HashiCorp Consul for service registration and discovery.
+
+Server-Side Discovery: Leverage Kubernetes' built-in service discovery mechanisms.
+
+API Gateway:
+
+Implement Spring Cloud Gateway for routing requests to appropriate microservices.
+
+Utilize the API Gateway for cross-cutting concerns: authentication, authorization, rate limiting, logging, and metrics collection.
+
+Configuration Management:
+
+Externalize configurations using Spring Cloud Config Server to centralize and manage configurations for all microservices.
+
+Implement client-side configuration retrieval using Spring Cloud Config Client.
+
+Inter-service Communication:
+
+Synchronous:
+
+RESTful APIs: Use Spring's RestTemplate or Spring Cloud OpenFeign for declarative REST clients.
+
+gRPC: For high-performance, low-latency communication, especially in polyglot environments.
+
+Asynchronous (Event-Driven):
+
+Message Brokers: Utilize Kafka, RabbitMQ, or ActiveMQ for asynchronous communication.
+
+Spring Cloud Stream: Build event-driven microservices by abstracting messaging middleware.
+
+Data Management:
+
+Database per Service: Each microservice should own its data store to maintain autonomy and loose coupling.
+
+Saga Pattern: Implement for distributed transactions to maintain data consistency across multiple services.
+
+Eventual Consistency: Design services to handle eventual consistency, especially in event-driven architectures.
+
+Resilience Patterns:
+
+Circuit Breaker (Resilience4j): Isolate failures in distributed systems by preventing cascading failures.
+
+Bulkhead Pattern: Isolate resources (e.g., thread pools) for different services to prevent one failing service from consuming all resources.
+
+Retry Pattern: Implement with exponential backoff for transient failures when calling other services.
+
+17.2. Observability in Microservices
+Distributed Tracing: Implement with Spring Cloud Sleuth and Jaeger/Zipkin to trace requests across multiple microservices.
+
+Centralized Logging: Aggregate logs from all microservices into a central system (e.g., ELK Stack, Grafana Loki).
+
+Aggregated Metrics: Collect and visualize metrics from all services using Prometheus and Grafana.
+
+Application Performance Monitoring (APM): Use tools like Micrometer, Dynatrace, or New Relic for deep insights into microservice performance.
+
+17.3. Security in Microservices
+Token-Based Authentication: Use JWT or OAuth2 tokens for authentication between client and API Gateway, and for inter-service communication.
+
+API Gateway Security: Enforce security policies at the API Gateway level.
+
+Inter-service Authentication/Authorization: Implement mechanisms for services to securely call each other (e.g., mTLS, service accounts).
+
+17.4. Testing Microservices
+Unit and Integration Tests: Essential for individual service components.
+
+Component Tests: Test a single microservice in isolation with its dependencies mocked or stubbed.
+
+Contract Testing (Spring Cloud Contract): Ensure compatibility between consuming and providing services by defining and verifying API contracts.
+
+End-to-End Tests: Test the entire system flow, but keep them minimal due to complexity and flakiness.
+
+17.5. Deployment and Orchestration
+Containerization (Docker): Package each microservice into an immutable Docker image.
+
+Container Orchestration (Kubernetes): Use Kubernetes for deploying, scaling, and managing microservices.
+
+Service Mesh (Istio, Linkerd): Consider a service mesh for advanced traffic management, security, and observability features at the infrastructure level.
+
+CI/CD Pipelines: Automate the build, test, and deployment process for each microservice independently.
+
+18. Modern Development Practices
+DevOps Integration: Use GitOps principles for deployment.
+
+Observability: Implement the three pillars (metrics, logs, traces).
+
+Feature Flags: Use feature toggles for gradual rollouts.
+
+A/B Testing: Implement for data-driven decisions.
+
+Chaos Engineering: Test system resilience with controlled failures.
+
+Progressive Delivery: Use canary deployments and blue-green deployments.
+
+Shift-Left Security: Implement security testing early in development.
+
+Code Quality: Use SonarQube, SpotBugs, and PMD for static analysis.
+
+Dependency Management: Keep dependencies up to date and scan for vulnerabilities.
+
+19. Error Handling and Resilience
+Global Exception Handling: Implement global exception handling with @ControllerAdvice.
+
+Problem Details (RFC 7807): Use problem details for consistent error responses.
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import java.net.URI;
+import jakarta.validation.ValidationException; // Example exception
+
+@ControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<ProblemDetail> handleValidation(ValidationException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+            HttpStatus.BAD_REQUEST,
+            ex.getMessage()
+        );
+        problemDetail.setType(URI.create("https://api.example.com/problems/validation"));
+        problemDetail.setTitle("Validation Error");
+        return ResponseEntity.badRequest().body(problemDetail);
+    }
+
+    // Add more specific exception handlers as needed
+}
+
+
+Circuit Breakers: Implement circuit breakers for external service calls.
+
+Timeouts: Use timeouts for all external calls.
+
+Retry Logic: Implement proper retry logic with exponential backoff.
+
+Bulkhead Pattern: Use bulkhead pattern to isolate failures.
+
+Graceful Degradation: Implement graceful degradation for non-critical features.
+
+Health Checks: Use health checks to monitor application state.
+
+Logging for Failures: Implement proper logging for debugging failures.
+
+20. Best Practices Checklist
+✅ SOLID Principles: Maintain high cohesion and low coupling.
+✅ RESTful API Design: Proper use of HTTP methods, status codes, and resource naming.
+✅ Error Handling: Comprehensive exception handling with proper HTTP status codes.
+✅ Validation: Input validation at API boundaries and business logic validation.
+✅ Security: Authentication, authorization, and protection against common vulnerabilities.
+✅ Testing: Unit tests, integration tests, and end-to-end tests.
+✅ Documentation: Code documentation and API documentation.
+✅ Monitoring: Application metrics, logging, and health checks.
+✅ Performance: Caching, connection pooling, and query optimization.
+✅ Maintainability: Clean code, proper architecture, and separation of concerns.
+✅ Resilience: Circuit breakers, timeouts, and graceful degradation.
+✅ Scalability: Async processing, caching, and database optimization.
+✅ DevOps: CI/CD, containerization, and infrastructure as code.
+✅ Observability: Metrics, logs, and distributed tracing.
+
+21. Modern Java 24 + Spring Boot 3.4+ Example
+This example demonstrates the integration of several modern Java and Spring Boot features, including virtual threads, structured concurrency, and advanced configuration.
+
+import jakarta.persistence.*;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import lombok.RequiredArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.data.jpa.repository.JpaRepository;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.StructuredTaskScope;
+import java.net.URI;
+import org.springframework.http.ProblemDetail; // For RFC 7807
+
+// --- Application Entry Point ---
+@SpringBootApplication
+@EnableConfigurationProperties(SecurityProperties.class) // Assuming SecurityProperties is defined elsewhere
+@EnableScheduling
+@EnableAsync
+@EnableJpaAuditing // Enable JPA Auditing
+public class ModernSpringBootApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(ModernSpringBootApplication.class, args);
+    }
+
+    // Define a virtual thread executor for @Async
+    @Bean
+    public Executor virtualThreadExecutor() {
+        return Executors.newVirtualThreadPerTaskExecutor();
+    }
+
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+}
+
+// --- Configuration Properties Example (re-included for completeness) ---
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.*;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.bind.DefaultValue;
+import org.springframework.validation.annotation.Validated;
+import java.time.Duration;
+import java.util.List;
+
+@ConfigurationProperties(prefix = "app.security")
+@Validated
+public record SecurityProperties(
+    @NotBlank String jwtSecret,
+    @NotNull @DurationMin(minutes = 5) Duration jwtExpiration,
+    @NotEmpty List<@Pattern(regexp = "^https?://.*") String> allowedOrigins,
+    @Valid RateLimitConfig rateLimit
+) {
+    public record RateLimitConfig(
+        @Min(1) int requestsPerMinute,
+        @NotNull Duration windowSize
+    ) {}
+}
+
+
+// --- REST Controller ---
+@RestController
+@RequestMapping("/api/v1/orders")
+@RequiredArgsConstructor
+@Validated
+@Tag(name = "Order Management", description = "Operations for managing customer orders")
+public class OrderController {
+
+    private static final Logger log = LoggerFactory.getLogger(OrderController.class);
+    private final OrderService orderService;
+
+    @PostMapping
+    @Operation(summary = "Create a new order", description = "Creates a new order and processes payment/notifications asynchronously")
+    public CompletableFuture<ResponseEntity<OrderDto>> createOrder(
+            @Valid @RequestBody CreateOrderRequest request) {
+
+        return orderService.createOrderAsync(request)
+                .thenApply(order -> ResponseEntity.status(HttpStatus.CREATED).body(order))
+                .exceptionally(ex -> {
+                    log.error("Failed to create order", ex);
+                    // Return a ProblemDetail for better error responses
+                    ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                            HttpStatus.BAD_REQUEST,
+                            "Failed to create order: " + ex.getMessage()
+                    );
+                    problemDetail.setType(URI.create("https://api.example.com/problems/order-creation-failure"));
+                    problemDetail.setTitle("Order Creation Error");
+                    return ResponseEntity.badRequest().body(problemDetail);
+                });
+    }
+}
+
+// --- Service Layer ---
+@Service
+@RequiredArgsConstructor
+@Transactional // Ensure transactional behavior
+public class OrderService {
+
+    private static final Logger log = LoggerFactory.getLogger(OrderService.class);
+    private final OrderRepository orderRepository;
+    private final PaymentService paymentService;
+    private final NotificationService notificationService;
+
+    @Async("virtualThreadExecutor") // Execute this method on a virtual thread
+    public CompletableFuture<OrderDto> createOrderAsync(CreateOrderRequest request) {
+        try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
+            // Validate order (add more robust validation here)
+            Order order = new Order(request.customerId(), request.items());
+            Order savedOrder = orderRepository.save(order);
+
+            // Process payment and send notifications concurrently using structured concurrency
+            var paymentTask = scope.fork(() -> paymentService.processPayment(savedOrder.getId()));
+            var notificationTask = scope.fork(() -> notificationService.sendOrderConfirmation(savedOrder));
+
+            scope.join(); // Wait for all forked tasks to complete
+            scope.throwIfFailed(); // Re-throw any exception from forked tasks
+
+            // Combine results and return DTO
+            return CompletableFuture.completedFuture(
+                OrderDto.from(savedOrder, paymentTask.resultNow())
+            );
+        } catch (InterruptedException | ExecutionException e) {
+            log.error("Error during order creation with structured concurrency", e);
+            throw new ServiceException("Failed to create order due to concurrent operation failure", e);
+        }
+    }
+}
+
+// --- Domain Model (Entity) ---
+@Entity
+@Table(name = "orders")
+@EntityListeners(AuditingEntityListener.class) // Enable auditing for createdAt/updatedAt
+@Getter // Lombok for getters
+@Setter // Lombok for setters
+@NoArgsConstructor // Lombok for no-arg constructor
+@AllArgsConstructor // Lombok for all-arg constructor
+public class Order {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private Long customerId;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private List<OrderItem> items = new ArrayList<>();
+
+    @Enumerated(EnumType.STRING)
+    private OrderStatus status = OrderStatus.PENDING;
+
+    @CreatedDate // Automatically set creation timestamp
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @LastModifiedDate // Automatically set last modification timestamp
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
+
+    public Order(Long customerId, List<OrderItem> items) {
+        this.customerId = customerId;
+        this.items = items;
+        // Ensure bidirectional relationship is set
+        if (items != null) {
+            items.forEach(item -> item.setOrder(this));
+        }
+    }
+}
+
+@Entity
+@Table(name = "order_items")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class OrderItem {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id", nullable = false)
+    private Order order;
+
+    @Column(nullable = false)
+    private String productName;
+
+    @Column(nullable = false)
+    private int quantity;
+
+    @Column(nullable = false)
+    private double price;
+}
+
+enum OrderStatus {
+    PENDING, PROCESSING, COMPLETED, CANCELLED, FAILED
+}
+
+// --- Repository Interface ---
+interface OrderRepository extends JpaRepository<Order, Long> {
+    // Custom query methods can be added here
+    Optional<Order> findByCustomerId(Long customerId);
+}
+
+// --- Other Services (Mock Implementations) ---
+@Service
+class PaymentService {
+    private static final Logger log = LoggerFactory.getLogger(PaymentService.class);
+
+    public String processPayment(Long orderId) {
+        log.info("Processing payment for order: {}", orderId);
+        // Simulate a long-running payment process
+        try {
+            Thread.sleep(100); // Simulate I/O bound operation
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Payment processing interrupted", e);
+        }
+        return "Payment_Success_Txn123";
+    }
+}
+
+@Service
+class NotificationService {
+    private static final Logger log = LoggerFactory.getLogger(NotificationService.class);
+
+    public void sendOrderConfirmation(Order order) {
+        log.info("Sending order confirmation for order: {}", order.getId());
+        // Simulate sending email/SMS
+        try {
+            Thread.sleep(50); // Simulate I/O bound operation
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Notification sending interrupted", e);
+        }
+    }
+}
+
+// --- DTOs and Request Objects ---
+public record CreateOrderRequest(
+    @NotNull Long customerId,
+    @NotEmpty List<@Valid OrderItemRequest> items
+) {}
+
+public record OrderItemRequest(
+    @NotBlank String productName,
+    @Min(1) int quantity,
+    @Positive double price
+) {}
+
+public record OrderDto(
+    Long id,
+    Long customerId,
+    List<OrderItemDto> items,
+    OrderStatus status,
+    String paymentTransactionId,
+    LocalDateTime createdAt
+) {
+    public static OrderDto from(Order order, String paymentTransactionId) {
+        List<OrderItemDto> itemDtos = order.getItems().stream()
+            .map(item -> new OrderItemDto(item.getProductName(), item.getQuantity(), item.getPrice()))
+            .toList();
+        return new OrderDto(
+            order.getId(),
+            order.getCustomerId(),
+            itemDtos,
+            order.getStatus(),
+            paymentTransactionId,
+            order.getCreatedAt()
+        );
+    }
+}
+
+public record OrderItemDto(String productName, int quantity, double price) {}
+
+// --- Custom Exception ---
+class ServiceException extends RuntimeException {
+    public ServiceException(String message) {
+        super(message);
+    }
+    public ServiceException(String message, Throwable cause) {
+        super(message, cause);
+    }
+}
