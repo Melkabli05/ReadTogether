@@ -1,0 +1,77 @@
+<section class="h-full">
+    <div class="flex items-center justify-between mt-8 mb-4">
+      <h2 class="section-title flex items-center gap-2 text-xl md:text-2xl font-extrabold">
+        <i class="pi {{ icon() }} {{ colorClass() }} text-xl md:text-3xl" 
+           [class.animate-pulse]="animateIcon()"></i>
+        {{ title() }}
+        @if (badge()) {
+          <span class="ml-2 flex items-center gap-1">
+            <span class="w-2 h-2 bg-green-500 rounded-full animate-ping"></span>
+            <span class="text-xs text-green-600 font-semibold">{{ badge() }}</span>
+          </span>
+        }
+      </h2>
+      @if (showMoreLabel()) {
+        <button
+          type="button"
+          [attr.aria-label]="'Show more ' + title().toLowerCase()"
+          class="show-more-btn flex items-center gap-1 px-3 py-1.5 rounded text-sm font-medium transition cursor-pointer {{ buttonColorClass() }}"
+          (click)="handleShowMore()">
+          {{ showMoreLabel() }} <i class="pi pi-angle-right"></i>
+        </button>
+      } 
+      @if (showSort()) {
+        <div class="flex items-center gap-2">
+            <span class="text-sm text-slate-600 hidden sm:inline">Sort:</span>
+            <p-select 
+            [options]="sortOptions()" 
+            [ngModel]="selectedSort()" 
+            (ngModelChange)="handleSortChange($event)"
+            optionLabel="label" 
+            optionValue="value"
+            placeholder="Select Sort Options" 
+            class="w-full no-border-select md:w-56" 
+            />
+          </div>
+      }
+    </div>
+
+    @if (items().length > 0) {
+      @if (shouldUseInfiniteScroll) {
+        <div
+          class="search-results"
+          infiniteScroll
+          [infiniteScrollDistance]="2"
+          [infiniteScrollThrottle]="50"
+          (scrolled)="handleLoadMore()"
+        >
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+            @for (item of items(); track trackByFn()($index, item)) {
+              <div class="transform hover:-translate-y-1 transition-transform duration-300 cursor-pointer">
+                <ng-container 
+                  *ngTemplateOutlet="cardTemplate(); context: { $implicit: item, index: $index }">
+                </ng-container>
+              </div>
+            }
+          </div>
+        </div>
+    }
+    @if (!shouldUseInfiniteScroll) {
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+        @for (item of items(); track trackByFn()($index, item)) {
+          <div class="transform hover:-translate-y-1 transition-transform duration-300 cursor-pointer">
+            <ng-container 
+              *ngTemplateOutlet="cardTemplate(); context: { $implicit: item, index: $index }">
+            </ng-container>
+          </div>
+        }
+      </div>
+    }
+  } @else {
+    <div class="col-span-full w-full h-full flex flex-col items-center justify-center text-center text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-900/50 rounded-2xl p-8">
+      <i class="pi {{ emptyState().icon }} text-5xl text-gray-300 dark:text-gray-600 mb-4"></i>
+      <h3 class="font-bold text-lg text-gray-700 dark:text-gray-200">{{ emptyState().title }}</h3>
+      <p class="text-sm">{{ emptyState().message }}</p>
+    </div>
+  }
+</section>

@@ -5,7 +5,6 @@ import { NgClass } from '@angular/common';
 
 @Component({
   selector: 'app-notification-item',
-  standalone: true,
   imports: [RelativeTimePipe, NgClass],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `

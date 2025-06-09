@@ -1,0 +1,61 @@
+// =====================================
+// 🎨 Color Palette - ReadTogether Theme
+// =====================================
+
+$color-primary: #4F46E5;
+$color-primary-hover: #4338CA;
+
+$color-accent: #FBBF24;
+$color-accent-hover: #F59E0B;
+
+$color-bg: #F9FAFB;
+$color-surface: #FFFFFF;
+
+$color-text: #111827;
+$color-text-secondary: #6B7280;
+
+$color-success: #10B981;
+$color-danger: #EF4444;
+$color-info: #3B82F6;
+
+$color-dark-bg: #1F2937;
+$color-dark-surface: #374151;
+
+// Transparent highlight for active reading paragraph
+$highlight-reading-paragraph: rgba(255, 224, 138, 0.3);
+
+// Gradients
+$gradient-progress: linear-gradient(to right, #4F46E5, #F59E0B);
+
+// =====================================
+// 🧱 Spacing
+// =====================================
+
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 16px;
+$spacing-lg: 24px;
+$spacing-xl: 32px;
+$spacing-xxl: 48px;
+
+// =====================================
+// 🔠 Typography
+// =====================================
+
+$font-family-base: 'Inter', sans-serif;
+
+$font-size-xs: 12px;
+$font-size-sm: 14px;
+$font-size-md: 16px;
+$font-size-lg: 20px;
+$font-size-xl: 24px;
+$font-size-xxl: 32px;
+
+$line-height-normal: 1.5;
+$line-height-relaxed: 1.75;
+
+// =====================================
+// 🌘 Dark Mode
+// =====================================
+
+

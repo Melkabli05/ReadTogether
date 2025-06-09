@@ -1,0 +1,121 @@
+<div class="relative inline-block">
+  <!-- Trigger Button -->
+  <button
+    #triggerButton
+    type="button"
+    pButton
+    class="px-4 py-2 text-sm font-medium border transition-all duration-200"
+    [class.bg-green-100]="hasSelections()"
+    [class.text-green-700]="hasSelections()"
+    [class.border-green-200]="hasSelections()"
+    [class.bg-white]="!hasSelections()"
+    [class.text-slate-700]="!hasSelections()"
+    [class.border-slate-200]="!hasSelections()"
+    [class.hover:bg-slate-50]="!hasSelections()"
+    (click)="op.toggle($event)"
+    [attr.aria-expanded]="op.overlayVisible"
+    [attr.aria-haspopup]="true"
+    [attr.aria-label]="ariaLabel()"
+    >
+    <i class="pi pi-book mr-2 text-xs"></i>
+    {{ label || placeholder }}
+    @if (selectedCount()) {
+      <span class="ml-2 px-2 py-0.5 bg-green-200 text-green-800 text-xs rounded-full">
+        {{ selectedCount() }}
+      </span>
+    }
+  </button>
+
+  <!-- Dropdown Panel (using PrimeNG OverlayPanel) -->
+  <p-overlayPanel #op (onShow)="onPanelShow()" [style]="{ 'width': dropdownWidth }">
+    <div
+      class="flex flex-col"
+      role="listbox"
+      [attr.aria-multiselectable]="true"
+      [attr.aria-label]="'Select from ' + options.length + ' options'"
+      >
+      <!-- Search Input -->
+      <div class="p-2 border-b border-slate-200 dark:border-slate-700">
+        <div class="relative">
+          <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" aria-hidden="true"></i>
+          <input
+            #searchInput
+            type="text"
+            [ngModel]="searchTerm()"
+            (ngModelChange)="searchTerm.set($event)"
+            class="w-full pl-9 pr-3 py-2 rounded-lg border-slate-300 dark:border-slate-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 bg-white dark:bg-slate-800 text-sm transition-all duration-200 placeholder:text-slate-400"
+            [placeholder]="searchPlaceholder"
+            [attr.aria-label]="'Search through ' + options.length + ' options'"
+            autocomplete="off"
+            spellcheck="false"
+            />
+        </div>
+      </div>
+
+      <!-- Options List -->
+      <div class="max-h-64 overflow-y-auto p-1">
+        @if (filteredOptions().length === 0) {
+          <div class="px-4 py-8 text-center">
+            <i class="pi pi-inbox text-slate-300 dark:text-slate-600 text-4xl mb-3 block" aria-hidden="true"></i>
+            <p class="text-slate-500 text-sm font-medium">{{ noResultsMessage }}</p>
+          </div>
+        } @else {
+          @for (option of filteredOptions(); track `${option.value}_${$index}`) {
+            <div
+              class="flex items-center px-3 py-2.5 hover:bg-slate-100 dark:hover:bg-slate-700/50 cursor-pointer transition-colors duration-150 rounded-lg group"
+              [class.font-semibold]="isSelected(option.value)"
+              [class.opacity-50]="option.disabled"
+              [class.cursor-not-allowed]="option.disabled"
+              (click)="!option.disabled && toggleOption(option.value)"
+              [attr.role]="'option'"
+              [attr.aria-selected]="isSelected(option.value)"
+              [attr.aria-disabled]="option.disabled"
+              >
+              <p-checkbox
+                [binary]="true"
+                [ngModel]="isSelected(option.value)"
+                (onChange)="!option.disabled && toggleOption(option.value)"
+                class="mr-3"
+                [attr.aria-label]="'Toggle ' + option.label"
+              ></p-checkbox>
+
+              <div class="flex items-center gap-2.5 flex-1 min-w-0">
+                @if (option.icon) {
+                  <i [class]="option.icon + ' text-base text-slate-500 dark:text-slate-400'"></i>
+                }
+                <span class="truncate text-sm text-slate-800 dark:text-slate-200">{{ option.label }}</span>
+              </div>
+              @if (isSelected(option.value)) {
+                <i class="pi pi-check text-blue-600 dark:text-blue-400 text-sm ml-auto"></i>
+              }
+            </div>
+          }
+        }
+      </div>
+
+      <!-- Footer Actions -->
+      @if (showFooterActions) {
+        <div class="border-t border-slate-200 dark:border-slate-700 p-2 flex items-center justify-end gap-2">
+          <button
+            pButton
+            pRipple
+            type="button"
+            label="Clear"
+            class="p-button-text p-button-sm"
+            (click)="clearAll()"
+            [disabled]="!hasSelections()"
+          ></button>
+          <button
+            pButton
+            pRipple
+            type="button"
+            label="Select All"
+            class="p-button-text p-button-sm"
+            (click)="selectAll()"
+            [disabled]="allSelected()"
+          ></button>
+        </div>
+      }
+    </div>
+  </p-overlayPanel>
+</div>

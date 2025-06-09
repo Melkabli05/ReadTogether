@@ -27,9 +27,20 @@
   </p-menu>
 
   <div class="flex items-center gap-x-6 ml-auto">
-    <p-button icon="pi pi-microphone" label="New Session" (click)="onStartNewSession()" severity="info"></p-button>
+    <app-button
+      label="New Session"
+      icon="pi pi-microphone"
+      severity="info"
+      [size]="'sm'"
+      (click)="onStartNewSession()"
+    />
 
-    <p-button [icon]="isDarkMode() ? 'pi pi-sun' : 'pi pi-moon'" [severity]="themeSeverity" [rounded]="true" (onClick)="toggleTheme()" />
+    <app-button
+      [icon]="themeIcon"
+      [severity]="themeSeverity"
+      [rounded]="true"
+      (click)="toggleTheme()"
+    />
 
     <span (click)="showNotifications($event)" class="relative cursor-pointer">
       <p-overlaybadge [value]="unreadCount">
@@ -47,7 +58,4 @@
     />
   </div>
 
-  <p-dialog [visible]="newSessionDialogOpen()" [modal]="true" [closable]="true" (onHide)="closeNewSessionDialog()" >
-    <app-new-session (submitted)="closeNewSessionDialog()"></app-new-session>
-  </p-dialog>
 </div>

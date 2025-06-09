@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
-@Pipe({ name: 'relativeTime', standalone: true, pure: true })
+@Pipe({ name: 'relativeTime', pure: true })
 export class RelativeTimePipe implements PipeTransform {
   transform(value: string): string {
     const now = Date.now();

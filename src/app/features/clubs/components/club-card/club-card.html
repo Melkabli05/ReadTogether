@@ -1,0 +1,112 @@
+<div
+  class="shadow-md hover:shadow-lg transition rounded-lg flex flex-col w-full mx-auto relative overflow-hidden"
+  [ngClass]="clubColors().bg"
+>
+  <!-- Top Bar: Club Type & Rating -->
+  <div
+    class="px-4 pt-4 pb-8 flex justify-between items-center"
+    [ngClass]="clubColors().bg"
+  >
+    <div class="flex items-center gap-2">
+      <span
+        class="px-2 py-0.5 rounded-full text-xs font-semibold text-gray-700 bg-white shadow-md"
+        aria-label="Club genre"
+      >
+        {{ genre() }}
+      </span>
+    </div>
+    <div class="flex items-center gap-1 bg-white rounded-full p-1 shadow-md px-2 py-0.5">
+      <i class="pi pi-star-fill text-yellow-400 text-xs"></i>
+      <span class="text-gray-700 text-sm font-semibold" aria-label="Club rating">
+        {{ rating() }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="p-4 flex flex-col gap-3 bg-white">
+    <!-- Club Icon & Title -->
+    <div class="flex items-start gap-3">
+      <div
+        class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+        [ngClass]="clubColors().accent"
+      >
+        <i class="pi pi-book text-xl text-white"></i>
+      </div>
+      <div class="flex-1 min-w-0">
+        <h3 class="font-bold text-lg text-gray-900 truncate mb-1" aria-label="Club name">
+          {{ club().name }}
+        </h3>
+        <div class="flex items-center gap-4 text-xs text-gray-500">
+          <span class="flex items-center gap-1" aria-label="Member count">
+            <i class="pi pi-users"></i> {{ club().memberCount }}
+          </span>
+          <span class="flex items-center gap-1" aria-label="Views">
+            <i class="pi pi-eye"></i> {{ club().views }}
+          </span>
+          <span class="flex items-center gap-1" aria-label="Likes">
+            <i class="pi pi-heart"></i> {{ club().likes }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Description -->
+    <div class="text-sm text-gray-600 line-clamp-3">
+      {{ club().description }}
+    </div>
+
+    <!-- Currently Reading -->
+    <div class="from-gray-50 to-blue-50 bg-gradient-to-br rounded-lg p-3">
+      <div class="text-xs text-gray-500 mb-1">Currently Reading</div>
+      <div class="font-semibold text-gray-800 mb-1" aria-label="Currently reading title">
+        {{ currentlyReadingTitle() }}
+      </div>
+      <div class="text-xs text-gray-500" aria-label="Currently reading author">
+        by {{ currentlyReadingAuthor() }}
+      </div>
+    </div>
+
+    <!-- Admin Info & Next Meeting -->
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        @if (owner()?.profilePictureUrl) {
+          <img [src]="owner()?.profilePictureUrl" class="w-8 h-8 rounded-full" />
+        } @else {
+          <div
+            class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white"
+            [ngClass]="clubColors().accent"
+        >
+            {{ ownerInitials().toUpperCase() }}
+          </div>
+        }
+        <div>
+          <div class="text-xs font-semibold text-gray-800">
+            {{ ownerDisplayName() }}
+          </div>
+          <div class="text-xs text-gray-400">Club Admin</div>
+        </div>
+      
+      </div>
+    </div>
+
+    <!-- Next Meeting -->
+    <div class="bg-green-50 text-green-700 text-xs font-medium px-3 py-2 rounded-lg flex items-center gap-2" aria-label="Next meeting">
+      <i class="pi pi-calendar"></i>
+      <span>
+        Next: {{ formattedNextMeeting() }}
+      </span>
+    </div>
+
+    <!-- Join Button -->
+    <app-button
+      label="Join Club"
+      icon="pi pi-users"
+      iconPos="left"
+      severity="vibrant"
+      gradient="horizontal"
+      [fullWidth]="true"
+      size="sm"
+    />
+  </div>
+</div>

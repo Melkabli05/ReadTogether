@@ -1,0 +1,92 @@
+<div class="flex justify-center items-center">
+  <div class="bg-white border border-gray-100 shadow-md hover:shadow-lg transition rounded-2xl flex w-full max-w-xl mx-auto gap-6 p-6">
+    <!-- Avatar -->
+    <div class="flex flex-col items-center">
+      <div class="relative w-24 h-24">
+        @if (user()?.profilePictureUrl) {
+          <img
+            [src]="user()?.profilePictureUrl"
+            class="w-24 h-24 rounded-full object-cover border-4 border-white shadow"
+            alt="Profile"
+          />
+        } @else {
+          <div class="w-24 h-24 rounded-full bg-blue-200 flex items-center justify-center text-4xl font-bold text-blue-500 border-4 border-white shadow">
+            {{ user()?.displayName?.charAt(0) }}
+          </div>
+        }
+        <!-- Online badge -->
+        @if (user() && user()!.isOnline) {
+          <span
+            class="absolute bottom-1 right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full"
+            title="Online">
+          </span>
+        }
+      </div>
+      <div class="flex flex-col gap-2 mt-4">
+        <app-button
+          label="View Profile"
+          icon="pi pi-user"
+          iconPos="left"
+          severity="primary"
+          [outlined]="true"
+          [size]="'xs'"
+          [fullWidth]="true"
+        />
+        <app-button
+          label="Follow"
+          icon="pi pi-plus"
+          iconPos="right"
+          severity="primary"
+          [size]="'xs'"
+          [fullWidth]="true"
+        />
+      </div>
+    </div>
+    <!-- Card Content -->
+    <div class="flex-1 flex flex-col justify-between">
+      <!-- Role Badge (show first language as badge) -->
+      <div class="">
+        @if (languages().length) {
+          <span
+            class="inline-block bg-purple-100 text-purple-700 text-xs font-semibold px-3 py-1 rounded-lg">
+            {{ languages()[0].code.toUpperCase() }} ({{ languages()[0].proficiency }})
+          </span>
+        }
+      </div>
+      <!-- Name, Verified, Username -->
+      <div class="flex items-center gap-2">
+        <span class="text-xl font-bold text-gray-900">{{ user()?.displayName }}</span>
+        @if (user() && user()!.badge) {
+          <span
+            class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-green-100 border border-green-300">
+            <i class="pi pi-check text-green-500"></i>
+          </span>
+        }
+      </div>
+      <!-- Bio -->
+      <div class="text-sm text-gray-700 line-clamp-2">
+        {{ user()?.bio ?? 'No bio provided.' }}
+      </div>
+      <!-- Pills: Interests -->
+      <div class="flex flex-wrap gap-2">
+        @for (interest of readingInterests(); track interest) {
+          <span
+            class="bg-gray-100 text-gray-700 text-xs font-medium px-3 py-1 rounded-full truncate max-w-[90px]">
+            {{ interest }}
+          </span>
+        }
+      </div>
+      <!-- Stats Row -->
+      <div class="flex items-center gap-4 text-xs text-gray-600">
+        <span class="flex items-center gap-1">
+          <i class="pi pi-users"></i>
+          {{ stats().partnersReadWith }} partners
+        </span>
+        <span class="flex items-center gap-1">
+          <i class="pi pi-star"></i>
+          {{ stats().kudosReceived }} kudos
+        </span>
+      </div>
+    </div>
+  </div>
+</div>

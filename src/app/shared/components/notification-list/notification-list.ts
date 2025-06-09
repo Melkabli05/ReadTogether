@@ -5,7 +5,6 @@ import { Notification } from './notification';
 
 @Component({
   selector: 'app-notification-list',
-  standalone: true,
   imports: [OverlayBadgeModule, Notification],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `

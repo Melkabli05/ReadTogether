@@ -2,107 +2,134 @@
 
 ## Project Structure
 
-The following structure illustrates the recommended organization for this Angular application, following best practices for modularity, maintainability, and scalability:
-
 ```
 src
 └── app
-    ├── app.ts                      // Main standalone component
     ├── app.config.ts
     ├── app.routes.ts
-    ├── app.html
-    ├── app.css
-    ├── app.spec.ts
-    │
-    ├── core                        // Non-business specific, app-wide features
-    │   ├── auth                    // Authentication (login, register, user session)
+    ├── app.component.ts / .html / .css
+    └── main.ts
+
+    ├── core                                // Singleton services & system-level logic
+    │   ├── auth
     │   │   ├── models
     │   │   │   └── user.model.ts
     │   │   ├── guards
-    │   │   │   └── auth-guard.ts
+    │   │   │   └── auth.guard.ts
     │   │   ├── services
-    │   │   │   └── auth.ts         // (formerly auth.service.ts)
+    │   │   │   └── auth.service.ts
     │   │   ├── pages
-    │   │   │   ├── login
-    │   │   │   └── register
+    │   │   │   └── login/
+    │   │   │   └── register/
     │   │   └── auth.routes.ts
-    │   ├── layout                  // Main app shell, navbars, footers
-    │   │   └── components
-    │   │       ├── navbar
-    │   │       └── footer
-    │   ├── services                // Isolated core services
-    │   │   └── notification.ts     // For global notifications
-    │   │   └── theme.ts            // For theme management (dark/light mode)
-    │   └── interceptors
-    │       └── api-interceptor.ts  // For HTTP request manipulation
+    │   ├── interceptors
+    │   │   └── auth.interceptor.ts
+    │   │   └── error.interceptor.ts
+    │   ├── layout
+    │   │   └── shell/                    // AppShell w/ sidebar, header, footer
+    │   │   └── sidebar/
+    │   │   └── header/
+    │   │   └── footer/
+    │   └── theme/
+    │       └── theme.service.ts
+    │       └── dark-mode-toggle/
+
+    ├── shared                              // Reusable UI & utils
+    │   ├── components/
+    │   │   ├── button/
+    │   │   ├── modal/
+    │   │   ├── avatar/
+    │   │   ├── loading-spinner/
+    │   ├── pipes/
+    │   │   └── time-ago.pipe.ts
+    │   │   └── truncate.pipe.ts
+    │   ├── directives/
+    │   │   └── auto-scroll.directive.ts
+    │   └── utils/
+    │       ├── date.utils.ts
+    │       └── validation.utils.ts
+
+    ├── features                             // Business domains
     │
-    ├── modules                     // Business domain features
     │   ├── user-profile
-    │   │   ├── pages
-    │   │   │   └── view-profile
-    │   │   │   └── edit-profile
-    │   │   ├── components
-    │   │   │   └── profile-card    // Could be a 'smart' shared component if only used within this domain
-    │   │   ├── services
-    │   │   │   └── user-profile.ts
+    │   │   ├── pages/
+    │   │   │   └── view-profile/
+    │   │   │   └── edit-profile/
+    │   │   ├── components/
+    │   │   │   └── profile-header/
+    │   │   ├── services/
+    │   │   │   └── user-profile.service.ts
     │   │   └── user-profile.routes.ts
-    │   │
-    │   ├── reading-exchange        // Core domain for finding partners and texts
-    │   │   ├── pages
-    │   │   │   └── find-partner
-    │   │   │   └── browse-texts
-    │   │   ├── components
-    │   │   │   └── partner-filter
-    │   │   │   └── text-preview-card
-    │   │   ├── services
-    │   │   │   └── partner-matching.ts
-    │   │   │   └── text-discovery.ts
-    │   │   └── reading-exchange.routes.ts
-    │   │
-    │   ├── reading-session         // The interactive reading experience
-    │   │   ├── components
-    │   │   │   ├── text-viewer     // Displays the text, handles highlighting
-    │   │   │   ├── chat-panel      // Integrated text/voice chat
-    │   │   │   └── correction-tool // UI for suggesting/accepting corrections
-    │   │   ├── services
-    │   │   │   └── real-time-sync.ts // Handles WebSocket communication
-    │   │   │   └── reading-tool.ts   // Business logic for text interaction
-    │   │   ├── models
-    │   │   │   └── session.model.ts
-    │   │   │   └── annotation.model.ts
-    │   │   └── reading-session.routes.ts // e.g., /session/:sessionId
-    │   │
-    │   ├── content-management      // For users to upload and manage their texts
-    │   │   ├── pages
-    │   │   │   └── my-texts
-    │   │   │   └── upload-text
-    │   │   ├── services
-    │   │   │   └── file-upload.ts
-    │   │   │   └── library.ts
-    │   │   ├── components
-    │   │   │   └── file-uploader-ui
-    │   │   └── content-management.routes.ts
-    │   │
-    │   └── community               // Optional: for "Reading Moments" or forums
-    │       ├── pages
-    │       │   └── feed
-    │       │   └── post-detail
-    │       ├── components
-    │       │   └── moment-card
-    │       │   └── comment-thread
-    │       └── community.routes.ts
     │
-    └── shared                      // Dumb, reusable UI components, pipes, utils
-        ├── components
-        │   ├── button              // Reusable custom button
-        │   ├── modal
-        │   └── loading-spinner
-        ├── pipes
-        │   └── truncate-text-pipe.ts
-        │   └── relative-time-pipe.ts
-        ├── directives
-        │   └── highlight-on-hover.ts
-        └── utils
-            ├── validation.utils.ts
-            └── formatting.utils.ts
+    │   ├── reading-room                    // Real-time reading experience
+    │   │   ├── pages/
+    │   │   │   └── room-stage/             // Reader + moderator view
+    │   │   │   └── room-preview/           // Before joining
+    │   │   ├── components/
+    │   │   │   └── text-viewer/            // Highlights, turn indicator
+    │   │   │   └── turn-tracker/           // Who reads now
+    │   │   │   └── reactions-panel/
+    │   │   │   └── chat-panel/
+    │   │   │   └── correction-tools/
+    │   │   ├── models/
+    │   │   │   └── room.model.ts
+    │   │   │   └── turn.model.ts
+    │   │   ├── services/
+    │   │   │   └── real-time.service.ts
+    │   │   │   └── room.service.ts
+    │   │   └── reading-room.routes.ts
+    │
+    │   ├── discovery                       // Find readers & texts
+    │   │   ├── pages/
+    │   │   │   └── find-partner/
+    │   │   │   └── browse-texts/
+    │   │   ├── components/
+    │   │   │   └── partner-filter/
+    │   │   │   └── text-card/
+    │   │   ├── services/
+    │   │   │   └── partner.service.ts
+    │   │   │   └── text-discovery.service.ts
+    │   │   └── discovery.routes.ts
+    │
+    │   ├── content-management              // Uploading & managing own content
+    │   │   ├── pages/
+    │   │   │   └── upload-text/
+    │   │   │   └── my-library/
+    │   │   ├── components/
+    │   │   │   └── file-uploader-ui/
+    │   │   │   └── text-table/
+    │   │   ├── services/
+    │   │   │   └── upload.service.ts
+    │   │   │   └── library.service.ts
+    │   │   └── content.routes.ts
+    │
+    │   ├── clubs                           // Communities & group sessions
+    │   │   ├── pages/
+    │   │   │   └── club-feed/
+    │   │   │   └── create-club/
+    │   │   │   └── club-room/
+    │   │   ├── components/
+    │   │   │   └── club-post/
+    │   │   │   └── club-card/
+    │   │   ├── services/
+    │   │   │   └── club.service.ts
+    │   │   └── clubs.routes.ts
+    │
+    │   ├── notifications
+    │   │   ├── pages/
+    │   │   │   └── center/
+    │   │   ├── components/
+    │   │   │   └── notification-list/
+    │   │   │   └── notification-bell/
+    │   │   ├── models/
+    │   │   │   └── notification.model.ts
+    │   │   ├── services/
+    │   │   │   └── notification.service.ts
+    │   │   └── notifications.routes.ts
+
+    └── environments/
+        └── environment.ts
+        └── environment.prod.ts
+
+
 ```
