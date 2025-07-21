@@ -1,1 +1,0 @@
-import{Rb as r,Xa as a,sb as n,tb as c}from"./chunk-24QFR54W.js";import"./chunk-ODN5LVDJ.js";var l=class t{static \u0275fac=function(e){return new(e||t)};static \u0275cmp=a({type:t,selectors:[["app-create-club-page"]],decls:2,vars:0,template:function(e,i){e&1&&(n(0,"h1"),r(1,"Create Club"),c())},encapsulation:2})};export{l as CreateClubPage};

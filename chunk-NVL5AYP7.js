@@ -1,0 +1,1 @@
+import{Sb as n,Ya as s,tb as o,ub as a}from"./chunk-OGDA6C4E.js";import"./chunk-ODN5LVDJ.js";var r=class t{static \u0275fac=function(e){return new(e||t)};static \u0275cmp=s({type:t,selectors:[["app-browse-texts-page"]],decls:2,vars:0,template:function(e,p){e&1&&(o(0,"h1"),n(1,"Browse Texts"),a())},encapsulation:2})};export{r as BrowseTextsPage};

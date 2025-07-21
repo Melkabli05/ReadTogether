@@ -1,1 +1,0 @@
-import{Rb as s,Xa as a,sb as n,tb as l}from"./chunk-24QFR54W.js";import"./chunk-ODN5LVDJ.js";var c=class t{static \u0275fac=function(e){return new(e||t)};static \u0275cmp=a({type:t,selectors:[["app-club-feed-page"]],decls:2,vars:0,template:function(e,o){e&1&&(n(0,"h1"),s(1,"Club Feed"),l())},encapsulation:2})};export{c as ClubFeedPage};

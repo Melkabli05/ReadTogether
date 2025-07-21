@@ -1,1 +1,0 @@
-import{Rb as i,Xa as n,sb as a,tb as r}from"./chunk-24QFR54W.js";import"./chunk-ODN5LVDJ.js";var p=class t{static \u0275fac=function(e){return new(e||t)};static \u0275cmp=n({type:t,selectors:[["app-find-partner-page"]],decls:2,vars:0,template:function(e,o){e&1&&(a(0,"h1"),i(1,"Find Partner"),r())},encapsulation:2})};export{p as FindPartnerPage};
