@@ -1,0 +1,1 @@
+import{Sb as n,Ya as r,tb as s,ub as i}from"./chunk-4INGPXGM.js";import"./chunk-ODN5LVDJ.js";var a=class t{static \u0275fac=function(e){return new(e||t)};static \u0275cmp=r({type:t,selectors:[["app-register"]],decls:2,vars:0,template:function(e,p){e&1&&(s(0,"p"),n(1,"register works!"),i())},encapsulation:2})};export{a as Register};
