@@ -1,0 +1,1 @@
+import{Sb as i,Ya as t,tb as r,ub as n}from"./chunk-YG2LBRBX.js";import"./chunk-ODN5LVDJ.js";var o=class a{static \u0275fac=function(e){return new(e||a)};static \u0275cmp=t({type:a,selectors:[["app-my-library-page"]],decls:2,vars:0,template:function(e,m){e&1&&(r(0,"h1"),i(1,"My Library"),n())},encapsulation:2})};export{o as MyLibraryPage};

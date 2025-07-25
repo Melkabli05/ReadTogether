@@ -1,0 +1,1 @@
+import"./chunk-ODN5LVDJ.js";var o=[{path:"",pathMatch:"full",redirectTo:"my-library"},{path:"upload-text",loadComponent:()=>import("./chunk-66NSVVHW.js").then(t=>t.UploadTextPage)},{path:"my-library",loadComponent:()=>import("./chunk-25444CUE.js").then(t=>t.MyLibraryPage)}];export{o as CONTENT_MANAGEMENT_ROUTES};

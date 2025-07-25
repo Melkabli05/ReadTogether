@@ -1,0 +1,1 @@
+import{Sb as p,Ya as a,tb as n,ub as o}from"./chunk-YG2LBRBX.js";import"./chunk-ODN5LVDJ.js";var l=class t{static \u0275fac=function(e){return new(e||t)};static \u0275cmp=a({type:t,selectors:[["app-upload-text-page"]],decls:2,vars:0,template:function(e,i){e&1&&(n(0,"h1"),p(1,"Upload Text"),o())},encapsulation:2})};export{l as UploadTextPage};

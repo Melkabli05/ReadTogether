@@ -1,0 +1,1 @@
+import{Sb as l,Ya as t,tb as a,ub as n}from"./chunk-YG2LBRBX.js";import"./chunk-ODN5LVDJ.js";var m=class o{static \u0275fac=function(e){return new(e||o)};static \u0275cmp=t({type:o,selectors:[["app-club-room-page"]],decls:2,vars:0,template:function(e,c){e&1&&(a(0,"h1"),l(1,"Club Room"),n())},encapsulation:2})};export{m as ClubRoomPage};
